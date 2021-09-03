@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -37,10 +36,8 @@ class TopBarStorage(private val viewModel: RecyclerViewModel) {
     @Composable
     fun TopBarStorage() {
 
-        val storage = viewModel.storage.observeAsState(false)
-
         AnimatedVisibility(
-            visible = storage.value,
+            visible = viewModel.storageMenuVisible,
             enter = slideInVertically(
                 initialOffsetY = { fullHeight -> -fullHeight },
                 animationSpec = tween(
@@ -61,17 +58,13 @@ class TopBarStorage(private val viewModel: RecyclerViewModel) {
     @Composable
     private fun Path() {
 
-        val path by viewModel.path.observeAsState(STORAGE)
-
-        val storage = viewModel.storage.observeAsState()
-
         val dp: Dp by animateDpAsState(
-            targetValue = if (storage.value!!) 0.dp else (-10).dp,
+            targetValue = if (viewModel.storageMenuVisible) 0.dp else (-10).dp,
             animationSpec = spring(Spring.DampingRatioNoBouncy, Spring.StiffnessLow)
         )
 
         val angle: Float by animateFloatAsState(
-            targetValue = if (storage.value!!) 180F else 0F,
+            targetValue = if (viewModel.storageMenuVisible) 180F else 0F,
             animationSpec = tween(
                 durationMillis = 1000,
                 easing = FastOutSlowInEasing
@@ -95,13 +88,13 @@ class TopBarStorage(private val viewModel: RecyclerViewModel) {
                         .horizontalScroll(ScrollState(0)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val p = path.removePrefix(STORAGE).split('/').filterNot { it.isBlank() }
+                    val p = viewModel.path.removePrefix(STORAGE).split('/').filterNot { it.isBlank() }
                     Image(
                         painter = painterResource(id = R.drawable.ic_storage),
                         contentDescription = "",
                         modifier = Modifier
                             .size(40.dp)
-                            .clickable { viewModel.path.value = STORAGE }
+                            .clickable { viewModel.path = STORAGE }
                     )
                     if (p.isNotEmpty()) p.forEachIndexed { index, s ->
                         Next()
@@ -110,7 +103,7 @@ class TopBarStorage(private val viewModel: RecyclerViewModel) {
                             p.take(index + 1).fold(STORAGE) { total, next -> "$total/$next" })
                     }
                 }
-                IconButton(onClick = { viewModel.storage.value = viewModel.storage.value!!.not() },
+                IconButton(onClick = { viewModel.storageMenuChangeVisible() },
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .absoluteOffset(y = dp)
@@ -137,7 +130,7 @@ class TopBarStorage(private val viewModel: RecyclerViewModel) {
             fontSize = 20.sp,
             fontStyle = FontStyle.Italic,
             color = colorResource(id = R.color.gray_point_path),
-            modifier = Modifier.clickable { viewModel.path.value = path })
+            modifier = Modifier.clickable { viewModel.path = path })
     }
 
     @Composable

@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
 
         topBar = TopBar(recyclerViewModel)
 
-        bottomBar = BottomBar(recyclerViewModel)
+        bottomBar = BottomBar(recyclerViewModel, (resources.displayMetrics.widthPixels / resources.displayMetrics.density).dp)
 
         topBarStorage = TopBarStorage(recyclerViewModel)
 
@@ -91,13 +91,6 @@ class MainActivity : ComponentActivity() {
 
                 }
             },
-            floatingActionButton = {
-                IconToggleButton(checked = false, onCheckedChange = {}, modifier = Modifier.border(width = 2.dp, color = Color.Black)) {
-                    Icon(imageVector = Icons.Default.Check, contentDescription = "Режим выделения")
-                }
-            },
-            floatingActionButtonPosition = FabPosition.End,
-            isFloatingActionButtonDocked = true,
             bottomBar = { bottomBar.BottomBar() }
         )
     }

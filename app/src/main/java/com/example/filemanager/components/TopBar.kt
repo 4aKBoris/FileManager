@@ -8,20 +8,21 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -68,8 +69,6 @@ class TopBar(private val viewModel: RecyclerViewModel) {
     @Composable
     private fun SearchTextField() {
 
-        val request = viewModel.request.observeAsState("")
-
         val visible = remember { mutableStateOf(false) }
 
         val focusedLabelAndLeadingIconColor by animateColorAsState(
@@ -88,9 +87,13 @@ class TopBar(private val viewModel: RecyclerViewModel) {
             animationSpec = spring(stiffness = Spring.StiffnessVeryLow)
         )
 
+        val (request, setRequest) = rememberSaveable { mutableStateOf("") }
+
+        viewModel.request = request
+
         TextField(
-            value = request.value,
-            onValueChange = { value -> viewModel.request.value = value },
+            value = request,
+            onValueChange = setRequest,
             trailingIcon = {
                 IconButton(onClick = { visible.value = false }) {
                     Image(
@@ -157,9 +160,7 @@ class TopBar(private val viewModel: RecyclerViewModel) {
 
         Box(Modifier.wrapContentSize(Alignment.TopEnd)) {
             IconButton(
-                onClick = {
-                    viewModel.topBarSortMenuVisible.value = viewModel.topBarSortMenuVisible.value!!.not()
-                }) {
+                onClick = { viewModel.sortMenuChangeVisible() }) {
                 Icon(
                     Icons.Default.Sort,
                     contentDescription = "Сортировка",
@@ -181,7 +182,7 @@ class TopBar(private val viewModel: RecyclerViewModel) {
         )
 
         IconButton(
-            onClick = { viewModel.storage.value = !viewModel.storage.value!! },
+            onClick = { viewModel.storageMenuChangeVisible() },
         ) {
             Icon(
                 imageVector = Icons.Default.Storage,

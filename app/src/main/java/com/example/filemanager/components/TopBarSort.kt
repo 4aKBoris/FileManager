@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import com.example.filemanager.R
 import com.example.filemanager.RecyclerViewModel
+import com.example.filemanager.sort.SortingOrder
+import com.example.filemanager.sort.SortingType
 
 class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWindow: Float) {
 
@@ -41,12 +43,10 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
     @Composable
     fun TopBarSort(modifier: Modifier) {
 
-        val visible = viewModel.topBarSortMenuVisible.observeAsState()
-
         Box(modifier = modifier) {
 
             AnimatedVisibility(
-                visible = visible.value!!,
+                visible = viewModel.sortMenuVisible,
                 enter = expandHorizontally(
                     expandFrom = Alignment.CenterHorizontally,
                     animationSpec = tween(
@@ -64,9 +64,8 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     fun OnClick(number: Int) {
-                        viewModel.sort.value = number
-                        viewModel.upDown.value =
-                            viewModel.upDown.value!!.not()
+                        viewModel.sortingType = SortingType.values()[number]
+                        viewModel.swapSortingOrder()
                     }
 
                     for (i in 1..5) MenuSortItem(
@@ -90,11 +89,7 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
 
         val length = text.length
 
-        val typeSort = viewModel.sort.observeAsState()
-
-        val upDown = viewModel.upDown.observeAsState()
-
-        val visibleArrow = typeSort.value == number + 1
+        val visibleArrow = SortingType.values()[number + 1] == viewModel.sortingType
 
         var s by remember { mutableStateOf(Size.Zero) }
 
@@ -132,8 +127,6 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
             )
         )
 
-        val widthTextBox = lengthSortItems[number]
-
         val height by infiniteTransition.animateFloat(
             initialValue = 0f,
             targetValue = 0f,
@@ -157,7 +150,7 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
         )
 
         val rotateIconUpDown by animateFloatAsState(
-            targetValue = if (upDown.value!!) 0f else 180f,
+            targetValue = if (viewModel.sortingOrder == SortingOrder.ASCENDING) 0f else 180f,
             animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
         )
 
@@ -252,9 +245,6 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
                 )
             )
 
-            println(s.height)
-            println(s.width)
-
             Canvas(
                 modifier = Modifier
                     .padding()
@@ -276,8 +266,6 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
     companion object {
 
         private const val animateDuration = 56000
-
-        private val lengthSortItems = listOf(203f, 187f, 271f, 293f, 441f)
 
         private val typesOfSort = listOf(
             "По алфавиту",

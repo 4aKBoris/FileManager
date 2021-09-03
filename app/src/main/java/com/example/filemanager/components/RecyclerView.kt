@@ -3,46 +3,36 @@
 package com.example.filemanager.components
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.filemanager.R
 import com.example.filemanager.RecyclerViewModel
-import com.example.filemanager.constants.STORAGE
-import com.example.filemanager.extensions.convertToFileItem
-import com.example.filemanager.extensions.sortByCondition
 import com.example.filemanager.item.FileItem
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -53,106 +43,20 @@ class RecyclerView(private val viewModel: RecyclerViewModel) {
 
     @OptIn(
         ExperimentalFoundationApi::class,
-        androidx.compose.animation.ExperimentalAnimationApi::class
+        ExperimentalAnimationApi::class
     )
     @SuppressLint("NewApi")
     @Composable
     fun RecyclerView() {
         val scrollState = rememberLazyListState()
 
-        var items = listOf<FileItem>()
-
-        val path by viewModel.path.observeAsState(STORAGE)
-
-        val sortType = viewModel.typeSort.observeAsState(1)
-
-        val sort = viewModel.sort.observeAsState(0)
-
-        val upDown = viewModel.upDown.observeAsState(false)
-
-        val emptyFolder = remember { mutableStateOf(false) }
-
-        val selectedItems = remember { mutableStateListOf<String>() }
-
-        val dialog = viewModel.dialog.observeAsState()
-
-        val dialogSelect = viewModel.dialogSelect.observeAsState()
-
-        val search = viewModel.request.observeAsState("")
-
-        val storage = viewModel.storage.observeAsState(false)
-
-        fun swap(name: String) {
-            if (selectedItems.contains(name)) selectedItems.remove(name) else selectedItems.add(name)
-        }
-
-        viewModel.select.value = selectedItems.isNotEmpty()
-
-        val files = File(path).listFiles()
-        emptyFolder.value = files.isNullOrEmpty()
-
-        if (!emptyFolder.value) items = files.convertToFileItem()
-
-        viewModel.path.observe(LocalLifecycleOwner.current) {
-            //selectedItems.clear()
-            println("viewModel.path.observe")
-            println(it)
-        }
-
-        items = items.sortByCondition(sortType.value, sort.value, upDown.value)
-
-        items = items.filter { it.fileName.contains(search.value, true) }
-
-        LazyColumn(state = scrollState, modifier = Modifier.fillMaxSize()) {
-
-            stickyHeader {
-                Column(
-                    modifier = Modifier.animateContentSize(
-                        animationSpec = spring(
-                            Spring.DampingRatioNoBouncy,
-                            Spring.StiffnessLow
-                        ),
-                        finishedListener = null
-                    )
-                ) { if (dialog.value!!) Select() }
-            }
-
-            if (!emptyFolder.value) items(items) {
-
-                val name = it.fileName
-
-                Item(
-                    item = it,
-                    select = selectedItems.contains(name),
-                    onClick = {
-                        if (it.isDirectory) viewModel.path.value = "$path/$name" else swap(name)
-                    },
-                    onLongClick = {
-                        if (selectedItems.contains(name)) selectedItems.remove(name)
-                        else {
-                            viewModel.dialog.value = true
-                            fileName = name
-                        }
-                    })
-            }
-            else item { EmptyFolder() }
-
-        }
-
-        if (dialog.value!!) {
-            viewModel.dialogSelect.value = 0
-        } else when (dialogSelect.value) {
-            1 -> selectedItems.addAll(items.takeWhile { it.fileName != fileName }
-                .takeLastWhile { !selectedItems.contains(it.fileName) }.map { it.fileName }
-                .plus(fileName))
-            2 -> selectedItems.addAll(items.takeLastWhile { it.fileName != fileName }
-                .takeWhile { !selectedItems.contains(it.fileName) }.map { it.fileName }
-                .plus(fileName))
-            3 -> swap(fileName)
-            else -> {
+        Crossfade(targetState = viewModel.files.isEmpty(),
+        animationSpec = tween(durationMillis = 1000, easing = LinearEasing)) { it ->
+            if (it) EmptyFolder()
+            else LazyColumn(state = scrollState, modifier = Modifier.fillMaxSize()) {
+                items(viewModel.files) { item -> Item(item = item) }
             }
         }
-
     }
 
     @Composable
@@ -178,19 +82,21 @@ class RecyclerView(private val viewModel: RecyclerViewModel) {
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    private fun Item(
-        item: FileItem,
-        select: Boolean,
-        onClick: () -> Unit,
-        onLongClick: () -> Unit
-    ) {
+    private fun Item(item: FileItem) {
 
-        val backgroundColor by animateColorAsState(targetValue = if (select) Color.LightGray else Color.White,
-        animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing))
+        val select = viewModel.isSelectedItem(item.fileName)
+
+        val backgroundColor by animateColorAsState(
+            targetValue = if (select) Color.LightGray else Color.White,
+            animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing)
+        )
 
         Box(
             modifier = Modifier
-                .combinedClickable(onClick = { onClick() }, onLongClick = { onLongClick() })
+                .combinedClickable(onClick = {
+                    if (viewModel.selectionMode) viewModel.checkItem(item.fileName)
+                    else (if (item.isDirectory) viewModel.addPath(item.fileName) else TODO())
+                }, onLongClick = { TODO() })
                 .background(backgroundColor)
         ) {
             Row(
@@ -199,53 +105,6 @@ class RecyclerView(private val viewModel: RecyclerViewModel) {
             ) {
                 FileIcon(drawable = painterResource(id = item.type))
                 InfoText(item = item)
-            }
-        }
-    }
-
-
-    @Composable
-    fun Select() {
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                ButtonSelect(
-                    name = "Выделение вверх",
-                    onClick = {
-                        viewModel.dialogSelect.value = 1
-                        viewModel.dialog.value = false
-                    },
-                    drawable = painterResource(id = R.drawable.ic_arrow_upward)
-                )
-                ButtonSelect(
-                    name = "Выделение данного элемента",
-                    onClick = {
-                        viewModel.dialogSelect.value = 2
-                        viewModel.dialog.value = false
-                    },
-                    drawable = painterResource(id = R.drawable.ic_add)
-                )
-                ButtonSelect(
-                    name = "Выделение вниз",
-                    onClick = {
-                        viewModel.dialogSelect.value = 3
-                        viewModel.dialog.value = false
-                    },
-                    drawable = painterResource(id = R.drawable.ic_arrow_downward)
-                )
-                ButtonSelect(
-                    name = "Закрыть",
-                    onClick = { viewModel.dialog.value = false },
-                    drawable = painterResource(id = R.drawable.ic_cancel)
-                )
             }
         }
     }

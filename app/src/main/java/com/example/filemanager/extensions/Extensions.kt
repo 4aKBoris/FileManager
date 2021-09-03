@@ -2,22 +2,16 @@
 
 package com.example.filemanager.extensions
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import com.example.filemanager.R
-import com.example.filemanager.Sort
-import com.example.filemanager.constants.DIRECTORY
-import com.example.filemanager.constants.FILE
+import com.example.filemanager.sort.Sort
 import com.example.filemanager.item.FileItem
+import com.example.filemanager.sort.SortingOrder
+import com.example.filemanager.sort.SortingType
+import com.example.filemanager.sort.TypeOfGrouping
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Files.*
-import java.nio.file.attribute.BasicFileAttributes
-import java.util.*
 import kotlin.math.pow
 
-fun List<FileItem>.sortByCondition(separation: Int, type: Int, upDown: Boolean) =
-    Sort(this, separation, type, upDown).sort()
+fun List<FileItem>.sortByCondition(typeOfGrouping: TypeOfGrouping, sortingType: SortingType, sortingOrder: SortingOrder) =
+    Sort(this, typeOfGrouping, sortingType, sortingOrder).sort()
 
 fun File.sizeString(): String {
 
@@ -50,4 +44,4 @@ fun File.sizeString(): String {
     }
 }
 
-fun Array<File>.convertToFileItem() = this.map { FileItem(it) }
+fun List<File>.convertToFileItem() = this.map { FileItem(it) }

@@ -19,6 +19,7 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        println(appContext.resources.displayMetrics.widthPixels)
         assertEquals("com.example.filemanager", appContext.packageName)
     }
 }

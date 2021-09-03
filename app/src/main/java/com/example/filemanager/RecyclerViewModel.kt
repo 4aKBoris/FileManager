@@ -1,40 +1,84 @@
+@file:Suppress("RECEIVER_NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+
 package com.example.filemanager
 
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.filemanager.extensions.convertToFileItem
+import com.example.filemanager.extensions.sortByCondition
+import com.example.filemanager.item.FileItem
+import com.example.filemanager.sort.SortingOrder
+import com.example.filemanager.sort.SortingType
+import com.example.filemanager.sort.TypeOfGrouping
+import java.io.File
 
 class RecyclerViewModel : ViewModel() {
 
-    private val _path = MutableLiveData("/storage/emulated/0")
-    private val _files = MutableLiveData(listOf<String>())
-    private val _emptyFolder = MutableLiveData(false)
-    private val _sort = MutableLiveData(0)
-    private val _upDown = MutableLiveData(false)
-    private val _typeSort = MutableLiveData(1)
-    private val _request = MutableLiveData("")
-    private val _select = MutableLiveData(false)
-    private val _dialog = MutableLiveData(false)
-    private val _dialogSelect = MutableLiveData(0)
-    private val _storage = MutableLiveData(false)
-    private val _action = MutableLiveData(0)
-    private val _animationBottomBar = MutableLiveData(false)
-    private val _topBarSortMenuVisible = MutableLiveData(false)
+    var path by mutableStateOf("/storage/emulated/0")
 
-    val path: MutableLiveData<String> = _path
-    val select: MutableLiveData<Boolean> = _select
-    val emptyFolder: MutableLiveData<Boolean> = _emptyFolder
-    val files: MutableLiveData<List<String>> = _files
-    val sort: MutableLiveData<Int> = _sort
-    val upDown: MutableLiveData<Boolean> = _upDown
-    val typeSort: MutableLiveData<Int> = _typeSort
-    val request: MutableLiveData<String> = _request
-    val dialog: MutableLiveData<Boolean> = _dialog
-    val dialogSelect: MutableLiveData<Int> = _dialogSelect
-    val storage: MutableLiveData<Boolean> = _storage
-    val action: MutableLiveData<Int> = _action
-    val animationBottomBar: MutableLiveData<Boolean> = _animationBottomBar
-    val topBarSortMenuVisible: MutableLiveData<Boolean> = _topBarSortMenuVisible
+    fun addPath(folder: String) {
+        path = "$path/$folder"
+    }
 
+    var files: List<FileItem> = listOf()
+        private set
+        get() = File(path).listFiles().filter { it.name.contains(request) }.convertToFileItem()
+            .sortByCondition(typeOfGrouping, sortingType, sortingOrder)
 
-    fun SwapDialog() { _dialog.value = _dialog.value!!.not() }
+    private val selectedItems = mutableStateListOf<String>()
+
+    fun isSelectedItem(name: String) = selectedItems.contains(name)
+
+    fun checkItem(name: String) {
+        if (isSelectedItem(name)) removeSelectedItem(name)
+        else addSelectedItem(name)
+    }
+
+    fun addSelectedItem(name: String) {
+        selectedItems.add(name)
+    }
+
+    fun removeSelectedItem(name: String) {
+        selectedItems.remove(name)
+    }
+
+    fun clearSelectedItems() {
+        selectedItems.clear()
+    }
+
+    var selectionMode by mutableStateOf(false)
+
+    fun swapSelectionMode() {
+        selectionMode = selectionMode.not()
+    }
+
+    var request by mutableStateOf("")
+
+    var sortMenuVisible by mutableStateOf(false)
+
+    fun sortMenuChangeVisible() {
+        sortMenuVisible = sortMenuVisible.not()
+    }
+
+    var storageMenuVisible by mutableStateOf(false)
+
+    fun storageMenuChangeVisible() {
+        storageMenuVisible = storageMenuVisible.not()
+    }
+
+    var sortingOrder by mutableStateOf(SortingOrder.DEFAULT)
+
+    fun swapSortingOrder() {
+        sortingOrder =
+            if (sortingOrder == SortingOrder.ASCENDING || sortingOrder == SortingOrder.DEFAULT) SortingOrder.DESCENDING
+            else SortingOrder.ASCENDING
+    }
+
+    var sortingType by mutableStateOf(SortingType.DEFAULT)
+
+    var typeOfGrouping by mutableStateOf(TypeOfGrouping.DEFAULT)
+
 }
