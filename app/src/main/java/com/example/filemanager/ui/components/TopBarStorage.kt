@@ -1,6 +1,6 @@
 @file:Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 
-package com.example.filemanager.components
+package com.example.filemanager.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -94,7 +94,7 @@ class TopBarStorage(private val viewModel: RecyclerViewModel) {
                         contentDescription = "",
                         modifier = Modifier
                             .size(40.dp)
-                            .clickable { viewModel.path = STORAGE }
+                            .clickable { viewModel.newPath(STORAGE) }
                     )
                     if (p.isNotEmpty()) p.forEachIndexed { index, s ->
                         Next()
@@ -130,7 +130,7 @@ class TopBarStorage(private val viewModel: RecyclerViewModel) {
             fontSize = 20.sp,
             fontStyle = FontStyle.Italic,
             color = colorResource(id = R.color.gray_point_path),
-            modifier = Modifier.clickable { viewModel.path = path })
+            modifier = Modifier.clickable { viewModel.newPath(path) })
     }
 
     @Composable

@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.filemanager.constants.STORAGE
 import com.example.filemanager.extensions.convertToFileItem
 import com.example.filemanager.extensions.sortByCondition
 import com.example.filemanager.item.FileItem
@@ -17,10 +18,24 @@ import java.io.File
 
 class RecyclerViewModel : ViewModel() {
 
-    var path by mutableStateOf("/storage/emulated/0")
+    private val pathStack = mutableListOf<String>(STORAGE)
+
+    var path: String by mutableStateOf(STORAGE)
 
     fun addPath(folder: String) {
-        path = "$path/$folder"
+        newPath("$path/$folder")
+    }
+
+    fun newPath(path: String) {
+        this.path = path
+        pathStack.add(path)
+    }
+
+    fun isEmptyBackStack() = pathStack.size == 1
+
+    fun onBackPressed() {
+        pathStack.removeLast()
+        path = pathStack.last()
     }
 
     var files: List<FileItem> = listOf()
@@ -37,21 +52,22 @@ class RecyclerViewModel : ViewModel() {
         else addSelectedItem(name)
     }
 
-    fun addSelectedItem(name: String) {
+    private fun addSelectedItem(name: String) {
         selectedItems.add(name)
     }
 
-    fun removeSelectedItem(name: String) {
+    private fun removeSelectedItem(name: String) {
         selectedItems.remove(name)
     }
 
-    fun clearSelectedItems() {
+    private fun clearSelectedItems() {
         selectedItems.clear()
     }
 
     var selectionMode by mutableStateOf(false)
 
     fun swapSelectionMode() {
+        if (selectionMode) clearSelectedItems()
         selectionMode = selectionMode.not()
     }
 
@@ -80,5 +96,11 @@ class RecyclerViewModel : ViewModel() {
     var sortingType by mutableStateOf(SortingType.DEFAULT)
 
     var typeOfGrouping by mutableStateOf(TypeOfGrouping.DEFAULT)
+
+    var theme by mutableStateOf(false)
+
+    fun swapTheme() {
+        theme = theme.not()
+    }
 
 }
