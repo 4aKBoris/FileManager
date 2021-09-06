@@ -17,10 +17,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.filemanager.ui.components.bar.BottomBar
+import com.example.filemanager.ui.components.bar.bottom.BottomBar
 import com.example.filemanager.ui.components.drawer.Drawer
 import com.example.filemanager.ui.components.recyclerview.RecyclerView
-import com.example.filemanager.ui.components.topbar.TopBar
+import com.example.filemanager.ui.components.bar.top.TopBar
 import com.example.filemanager.ui.components.TopBarSort
 import com.example.filemanager.ui.components.TopBarStorage
 import com.example.filemanager.ui.theme.FileManagerTheme
@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
         else recyclerViewModel.onBackPressed()
     }
 
-    @OptIn(ExperimentalAnimationApi::class)
+    @OptIn(ExperimentalAnimationApi::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     @Composable
     fun MainContent() {
 

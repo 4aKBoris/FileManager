@@ -1,6 +1,6 @@
 @file:Suppress("EXPERIMENTAL_IS_NOT_ENABLED", "PreviewMustBeTopLevelFunction")
 
-package com.example.filemanager.ui.components.bar
+package com.example.filemanager.ui.components.bar.bottom
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.example.filemanager.RecyclerViewModel
-import com.example.filemanager.ui.components.bar.bottom.BottomBarButtons
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -76,7 +75,7 @@ fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp) {
         borderFloat[i] = bF
     }
 
-    val selectMode = viewModel.selectionMode
+    val selectMode by viewModel.selectionMode.collectAsState()
 
     Box(
         modifier = Modifier

@@ -15,6 +15,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,7 +89,8 @@ class TopBarStorage(private val viewModel: RecyclerViewModel) {
                         .horizontalScroll(ScrollState(0)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val p = viewModel.path.removePrefix(STORAGE).split('/').filterNot { it.isBlank() }
+                    val path by viewModel.path.collectAsState()
+                    val p = path.removePrefix(STORAGE).split('/').filterNot { it.isBlank() }
                     Image(
                         painter = painterResource(id = R.drawable.ic_storage),
                         contentDescription = "",

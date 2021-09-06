@@ -2,6 +2,7 @@
 
 package com.example.filemanager.extensions
 
+import android.content.res.Resources
 import com.example.filemanager.sort.Sort
 import com.example.filemanager.item.FileItem
 import com.example.filemanager.sort.SortingOrder
@@ -45,3 +46,10 @@ fun File.sizeString(): String {
 }
 
 fun List<File>.convertToFileItem() = this.map { FileItem(it) }
+
+fun Float.dp(): Float = this * density + 0.5f
+
+val density: Float
+    get() = Resources.getSystem().displayMetrics.density
+
+fun Boolean.String(): String = if (this) "Да" else "Нет"

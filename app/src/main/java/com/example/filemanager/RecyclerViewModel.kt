@@ -3,49 +3,124 @@
 package com.example.filemanager
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.filemanager.constants.STORAGE
 import com.example.filemanager.extensions.convertToFileItem
-import com.example.filemanager.extensions.sortByCondition
 import com.example.filemanager.item.FileItem
 import com.example.filemanager.sort.SortingOrder
 import com.example.filemanager.sort.SortingType
 import com.example.filemanager.sort.TypeOfGrouping
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.io.File
 
 class RecyclerViewModel : ViewModel() {
 
     private val pathStack = mutableListOf<String>(STORAGE)
 
-    var path: String by mutableStateOf(STORAGE)
+    private val _path = MutableStateFlow(STORAGE)
+    private val _sortingType = MutableStateFlow(SortingType.DEFAULT)
+    private val _sortingOrder = MutableStateFlow(SortingOrder.DEFAULT)
+    private val _typeOfGrouping = MutableStateFlow(TypeOfGrouping.DEFAULT)
+    private val _revealedFiles = MutableStateFlow(listOf<String>())
+    private val _favoriteFiles = MutableStateFlow(listOf<String>())
+    private val _files = MutableStateFlow(listOf<FileItem>())
+    private val _selectedItems = MutableStateFlow(listOf<String>())
+    private val _selectionMode = MutableStateFlow(false)
 
-    fun addPath(folder: String) {
-        newPath("$path/$folder")
+    val path: StateFlow<String> get() = _path
+    val sortingType: MutableStateFlow<SortingType> get() = _sortingType
+    val sortingOrder: StateFlow<SortingOrder> get() = _sortingOrder
+    val typeOfGrouping: MutableStateFlow<TypeOfGrouping> get() = _typeOfGrouping
+    val revealedFiles: StateFlow<List<String>> get() = _revealedFiles
+    val favoriteFiles: StateFlow<List<String>> get() = _favoriteFiles
+    val files: StateFlow<List<FileItem>> get() = _files
+    val selectedItems: StateFlow<List<String>> get() = _selectedItems
+    val selectionMode: StateFlow<Boolean> get() = _selectionMode
+
+    fun onClickFavoriteFile(path: String) {
+        if (_favoriteFiles.value.contains(path)) onDeleteFavoriteFile(path = path) else onAddFavoriteFile(
+            path = path
+        )
+    }
+
+    private fun onAddFavoriteFile(path: String) {
+        if (_favoriteFiles.value.contains(path)) return
+        _favoriteFiles.value = _favoriteFiles.value.toMutableList().also { list ->
+            list.add(path)
+        }
+    }
+
+    private fun onDeleteFavoriteFile(path: String) {
+        if (!_favoriteFiles.value.contains(path)) return
+        _favoriteFiles.value = _favoriteFiles.value.toMutableList().also { list ->
+            list.remove(path)
+        }
+    }
+
+    fun onItemExpanded(name: String) {
+        if (_revealedFiles.value.contains(name)) return
+        _revealedFiles.value = _revealedFiles.value.toMutableList().also { list ->
+            list.add(name)
+        }
+    }
+
+    fun onItemCollapsed(name: String) {
+        if (!_revealedFiles.value.contains(name)) return
+        _revealedFiles.value = _revealedFiles.value.toMutableList().also { list ->
+            list.remove(name)
+        }
+    }
+
+    fun swapSortingOrder() {
+        _sortingOrder.value =
+            if (sortingOrder.value == SortingOrder.ASCENDING || sortingOrder.value == SortingOrder.DEFAULT) SortingOrder.DESCENDING
+            else SortingOrder.ASCENDING
+    }
+
+    init {
+        getFiles()
+    }
+
+    private fun getFiles() {
+        viewModelScope.launch(Dispatchers.Default) {
+            val testList =
+                File(_path.value).listFiles().toList().filter { it.name.contains(request) }
+                    .convertToFileItem()
+            /*.sortByCondition(typeOfGrouping.value, sortingType.value, sortingOrder.value)*/
+            _files.emit(testList)
+        }
+    }
+
+    private fun addPath(folder: String) {
+        newPath("${_path.value}/$folder")
     }
 
     fun newPath(path: String) {
-        this.path = path
-        pathStack.add(path)
+        _path.value = path
+        viewModelScope.launch(Dispatchers.Default) {
+            val testList =
+                File(_path.value).listFiles().toList().filter { it.name.contains(request) }
+                    .convertToFileItem()
+            /*.sortByCondition(typeOfGrouping.value, sortingType.value, sortingOrder.value)*/
+            _files.emit(testList)
+        }
+        pathStack.add(_path.value)
     }
 
     fun isEmptyBackStack() = pathStack.size == 1
 
     fun onBackPressed() {
         pathStack.removeLast()
-        path = pathStack.last()
+        _path.value = pathStack.last()
     }
 
-    var files: List<FileItem> = listOf()
-        private set
-        get() = File(path).listFiles().filter { it.name.contains(request) }.convertToFileItem()
-            .sortByCondition(typeOfGrouping, sortingType, sortingOrder)
-
-    private val selectedItems = mutableStateListOf<String>()
-
-    fun isSelectedItem(name: String) = selectedItems.contains(name)
+    fun isSelectedItem(name: String) = _selectedItems.value.contains(name)
 
     fun checkItem(name: String) {
         if (isSelectedItem(name)) removeSelectedItem(name)
@@ -53,22 +128,40 @@ class RecyclerViewModel : ViewModel() {
     }
 
     private fun addSelectedItem(name: String) {
-        selectedItems.add(name)
+        if (_selectedItems.value.contains(name)) return
+        _selectedItems.value = _selectedItems.value.toMutableList().also { list ->
+            list.add(name)
+        }
     }
 
     private fun removeSelectedItem(name: String) {
-        selectedItems.remove(name)
+        if (!_selectedItems.value.contains(name)) return
+        _selectedItems.value = _selectedItems.value.toMutableList().also { list ->
+            list.remove(name)
+        }
     }
+
+    fun onClick(item: FileItem) {
+        when (_selectionMode.value) {
+            true -> if (_selectedItems.value.contains(item.fileName)) removeSelectedItem(item.fileName) else addSelectedItem(
+                item.fileName
+            )
+            else -> if (item.isDirectory) addPath(item.fileName)
+        }
+    }
+
+    fun onLongClick(item: FileItem) {
+        if (item.isDirectory) addPath(item.fileName)
+    }
+
 
     private fun clearSelectedItems() {
-        selectedItems.clear()
+        _selectedItems.value = listOf()
     }
 
-    var selectionMode by mutableStateOf(false)
-
     fun swapSelectionMode() {
-        if (selectionMode) clearSelectedItems()
-        selectionMode = selectionMode.not()
+        if (_selectionMode.value) clearSelectedItems()
+        _selectionMode.value = _selectionMode.value.not()
     }
 
     var request by mutableStateOf("")
@@ -85,22 +178,9 @@ class RecyclerViewModel : ViewModel() {
         storageMenuVisible = storageMenuVisible.not()
     }
 
-    var sortingOrder by mutableStateOf(SortingOrder.DEFAULT)
-
-    fun swapSortingOrder() {
-        sortingOrder =
-            if (sortingOrder == SortingOrder.ASCENDING || sortingOrder == SortingOrder.DEFAULT) SortingOrder.DESCENDING
-            else SortingOrder.ASCENDING
-    }
-
-    var sortingType by mutableStateOf(SortingType.DEFAULT)
-
-    var typeOfGrouping by mutableStateOf(TypeOfGrouping.DEFAULT)
-
     var theme by mutableStateOf(false)
 
     fun swapTheme() {
         theme = theme.not()
     }
-
 }

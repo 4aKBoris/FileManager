@@ -12,3 +12,6 @@ val Black = Color(0xFF000000)
 val White = Color(0xFFFFFFFF)
 val LightGray = Color(0xFF9B9B9B)
 val DarkGray = Color(0xFF5A5A5A)
+
+val cardCollapsedBackgroundColor = Color(0xFFBDE7EC)
+val cardExpandedBackgroundColor = Color(0xFFD1A3FF)

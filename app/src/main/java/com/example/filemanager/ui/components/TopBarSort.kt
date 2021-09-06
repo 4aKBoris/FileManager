@@ -63,7 +63,7 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     fun OnClick(number: Int) {
-                        viewModel.sortingType = SortingType.values()[number]
+                        viewModel.sortingType.value = SortingType.values()[number]
                         viewModel.swapSortingOrder()
                     }
 
@@ -88,7 +88,7 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
 
         val length = text.length
 
-        val visibleArrow = SortingType.values()[number + 1] == viewModel.sortingType
+        val visibleArrow = SortingType.values()[number + 1] == viewModel.sortingType.value
 
         var s by remember { mutableStateOf(Size.Zero) }
 
@@ -149,7 +149,7 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
         )
 
         val rotateIconUpDown by animateFloatAsState(
-            targetValue = if (viewModel.sortingOrder == SortingOrder.ASCENDING) 0f else 180f,
+            targetValue = if (viewModel.sortingOrder.value == SortingOrder.ASCENDING) 0f else 180f,
             animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
         )
 
