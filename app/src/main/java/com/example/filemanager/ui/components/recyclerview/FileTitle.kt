@@ -40,9 +40,11 @@ fun FileTitle(
     item: FileItem,
     info: Boolean,
     edit: Boolean,
+    text: String,
     onClose: () -> Unit,
     onCancelEdit: () -> Unit,
     onEdit: () -> Unit,
+    setText: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -59,7 +61,8 @@ fun FileTitle(
                 animationSpec = tween(durationMillis = 500, easing = LinearEasing)
             ) {
                 if (it) EditFileName(
-                    name = item.fileName,
+                    text = text,
+                    setText = setText,
                     onCancelEdit = onCancelEdit,
                     onEdit = onEdit
                 ) else InfoText(item = item)
@@ -90,9 +93,8 @@ fun FileTitle(
 }
 
 @Composable
-private fun EditFileName(name: String, onCancelEdit: () -> Unit, onEdit: () -> Unit) {
+private fun EditFileName(text: String, setText: (String) -> Unit, onCancelEdit: () -> Unit, onEdit: () -> Unit) {
     Box(modifier = Modifier.fillMaxWidth()) {
-        val (text, setText) = rememberSaveable { mutableStateOf("name") }
         TextField(
             value = text, onValueChange = setText,
             leadingIcon = {

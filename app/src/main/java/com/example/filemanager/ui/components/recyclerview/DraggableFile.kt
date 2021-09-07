@@ -4,7 +4,6 @@ package com.example.filemanager.ui.components.recyclerview
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.animateColor
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -40,6 +39,7 @@ fun DraggableFile(
     item: FileItem,
     info: Boolean,
     edit: Boolean,
+    text: String,
     selected: Boolean,
     cardHeight: Dp,
     isRevealed: Boolean,
@@ -50,12 +50,14 @@ fun DraggableFile(
     onExpand: () -> Unit,
     onCollapse: () -> Unit,
     onItemClick: () -> Unit,
-    onItemLongClick: () -> Unit
+    onItemLongClick: () -> Unit,
+    setText: (String) -> Unit
 ) {
+    val state = isRevealed && !edit && !info
     val offsetX = remember { mutableStateOf(0f) }
     val transitionState = remember {
         MutableTransitionState(isRevealed).apply {
-            targetState = !isRevealed
+            targetState = !state //&& edit && info
         }
     }
     val transition = updateTransition(transitionState, "cardTransition")
@@ -63,50 +65,47 @@ fun DraggableFile(
         label = "cardBgColorTransition",
         transitionSpec = { tween(durationMillis = ANIMATION_DURATION) },
         targetValueByState = {
-            if (selected) (if (isRevealed) Color.Cyan else Color.Magenta)
-            else (if (isRevealed) cardExpandedBackgroundColor else cardCollapsedBackgroundColor)
+            if (selected) (if (state) Color.Cyan else Color.Magenta)
+            else (if (state) cardExpandedBackgroundColor else cardCollapsedBackgroundColor)
         }
     )
     val offsetTransition by transition.animateFloat(
         label = "cardOffsetTransition",
         transitionSpec = { tween(durationMillis = ANIMATION_DURATION) },
-        targetValueByState = { if (isRevealed) cardOffset - offsetX.value else -offsetX.value },
+        targetValueByState = { if (state) cardOffset - offsetX.value else -offsetX.value },
 
         )
     val cardElevation by transition.animateDp(
         label = "cardElevation",
         transitionSpec = { tween(durationMillis = ANIMATION_DURATION) },
-        targetValueByState = { if (isRevealed) 40.dp else 2.dp }
+        targetValueByState = { if (state) 40.dp else 2.dp }
     )
 
-    val mod = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 16.dp, vertical = 8.dp)
-
-    val modifier = mod
-        .offset { IntOffset((offsetX.value + offsetTransition).roundToInt(), 0) }
-        .pointerInput(Unit) {
-            detectHorizontalDragGestures { change, dragAmount ->
-                val original = Offset(offsetX.value, 0f)
-                val summed = original + Offset(x = dragAmount, y = 0f)
-                val newValue = Offset(x = summed.x.coerceIn(0f, cardOffset), y = 0f)
-                if (newValue.x >= 10) {
-                    onExpand()
-                    return@detectHorizontalDragGestures
-                } else if (newValue.x <= 0) {
-                    onCollapse()
-                    return@detectHorizontalDragGestures
-                }
-                change.consumePositionChange()
-                offsetX.value = newValue.x
-            }
-        }
-
     Card(
-        modifier = modifier.combinedClickable(
-            onClick = onItemClick,
-            onLongClick = onItemLongClick
-        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .offset { IntOffset((offsetX.value + offsetTransition).roundToInt(), 0) }
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { change, dragAmount ->
+                    val original = Offset(offsetX.value, 0f)
+                    val summed = original + Offset(x = dragAmount, y = 0f)
+                    val newValue = Offset(x = summed.x.coerceIn(0f, cardOffset), y = 0f)
+                    if (newValue.x >= 10) {
+                        onExpand()
+                        return@detectHorizontalDragGestures
+                    } else if (newValue.x <= 0) {
+                        onCollapse()
+                        return@detectHorizontalDragGestures
+                    }
+                    change.consumePositionChange()
+                    offsetX.value = newValue.x
+                }
+            }
+            .combinedClickable(
+                onClick = onItemClick,
+                onLongClick = onItemLongClick
+            ),
         backgroundColor = cardBgColor,
         shape = RoundedCornerShape(5.dp),
         elevation = cardElevation,
@@ -115,9 +114,11 @@ fun DraggableFile(
                 item = item,
                 info = info,
                 edit = edit,
+                text = text,
                 onClose = onClose,
                 onCancelEdit = onCancelEdit,
                 onEdit = onEdit,
+                setText = setText
             )
         }
     )

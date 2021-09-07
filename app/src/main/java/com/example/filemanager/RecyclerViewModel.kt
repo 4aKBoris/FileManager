@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.filemanager.constants.STORAGE
 import com.example.filemanager.extensions.convertToFileItem
+import com.example.filemanager.extensions.sortByCondition
 import com.example.filemanager.item.FileItem
 import com.example.filemanager.sort.SortingOrder
 import com.example.filemanager.sort.SortingType
@@ -32,6 +33,7 @@ class RecyclerViewModel : ViewModel() {
     private val _files = MutableStateFlow(listOf<FileItem>())
     private val _selectedItems = MutableStateFlow(listOf<String>())
     private val _selectionMode = MutableStateFlow(false)
+    private val _errorMessage = MutableStateFlow("")
 
     val path: StateFlow<String> get() = _path
     val sortingType: MutableStateFlow<SortingType> get() = _sortingType
@@ -42,6 +44,7 @@ class RecyclerViewModel : ViewModel() {
     val files: StateFlow<List<FileItem>> get() = _files
     val selectedItems: StateFlow<List<String>> get() = _selectedItems
     val selectionMode: StateFlow<Boolean> get() = _selectionMode
+    val errorMessage: StateFlow<String> get() = _errorMessage
 
     fun onClickFavoriteFile(path: String) {
         if (_favoriteFiles.value.contains(path)) onDeleteFavoriteFile(path = path) else onAddFavoriteFile(
@@ -50,21 +53,16 @@ class RecyclerViewModel : ViewModel() {
     }
 
     private fun onAddFavoriteFile(path: String) {
-        if (_favoriteFiles.value.contains(path)) return
-        _favoriteFiles.value = _favoriteFiles.value.toMutableList().also { list ->
-            list.add(path)
-        }
+        _favoriteFiles.value = _favoriteFiles.value.toMutableList().also { list -> list.add(path) }
     }
 
     private fun onDeleteFavoriteFile(path: String) {
-        if (!_favoriteFiles.value.contains(path)) return
-        _favoriteFiles.value = _favoriteFiles.value.toMutableList().also { list ->
-            list.remove(path)
-        }
+        _favoriteFiles.value =
+            _favoriteFiles.value.toMutableList().also { list -> list.remove(path) }
     }
 
-    fun onItemExpanded(name: String) {
-        if (_revealedFiles.value.contains(name)) return
+    fun onItemExpanded(name: String, flag: Boolean) {
+        if (_revealedFiles.value.contains(name) || flag) return
         _revealedFiles.value = _revealedFiles.value.toMutableList().also { list ->
             list.add(name)
         }
@@ -92,7 +90,7 @@ class RecyclerViewModel : ViewModel() {
             val testList =
                 File(_path.value).listFiles().toList().filter { it.name.contains(request) }
                     .convertToFileItem()
-            /*.sortByCondition(typeOfGrouping.value, sortingType.value, sortingOrder.value)*/
+                    .sortByCondition(typeOfGrouping.value, sortingType.value, sortingOrder.value)
             _files.emit(testList)
         }
     }
@@ -115,25 +113,14 @@ class RecyclerViewModel : ViewModel() {
         getFiles()
     }
 
-    fun isSelectedItem(name: String) = _selectedItems.value.contains(name)
-
-    fun checkItem(name: String) {
-        if (isSelectedItem(name)) removeSelectedItem(name)
-        else addSelectedItem(name)
-    }
 
     private fun addSelectedItem(name: String) {
-        if (_selectedItems.value.contains(name)) return
-        _selectedItems.value = _selectedItems.value.toMutableList().also { list ->
-            list.add(name)
-        }
+        _selectedItems.value = _selectedItems.value.toMutableList().also { list -> list.add(name) }
     }
 
     private fun removeSelectedItem(name: String) {
-        if (!_selectedItems.value.contains(name)) return
-        _selectedItems.value = _selectedItems.value.toMutableList().also { list ->
-            list.remove(name)
-        }
+        _selectedItems.value =
+            _selectedItems.value.toMutableList().also { list -> list.remove(name) }
     }
 
     fun onClick(item: FileItem) {
@@ -157,6 +144,19 @@ class RecyclerViewModel : ViewModel() {
     fun swapSelectionMode() {
         if (_selectionMode.value) clearSelectedItems()
         _selectionMode.value = _selectionMode.value.not()
+    }
+
+    fun renameFile(item: FileItem, name: String) {
+        try {
+            val n = if (item.isDirectory) "Папка" else "Файл"
+            val newFile = File(item.path.replace(item.fileName, name))
+            if (_files.value.find { it.fileName == name } != null) throw Exception("$n с таким именем уже существует!")
+            if (name.isBlank()) throw Exception("Введите имя файла!")
+            if (File(item.path).renameTo(newFile)) throw Exception("Переименование прошло успешно")
+            else throw Exception("Переименовать закончиловь ошибкой!")
+        } catch (e: Exception) {
+
+        }
     }
 
     var request by mutableStateOf("")

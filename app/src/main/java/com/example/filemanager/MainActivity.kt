@@ -2,18 +2,19 @@
 
 package com.example.filemanager
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var topBarSort: TopBarSort
 
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -68,7 +70,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainContent() {
 
-        val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed))
+        val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed), SnackbarHostState())
 
         val scope = rememberCoroutineScope()
 
@@ -78,12 +80,15 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        val errorMessage by recyclerViewModel.errorMessage.collectAsState()
+
+
         Scaffold(
             topBar = { TopBar(viewModel = recyclerViewModel, openDrawer = { openDrawer() }) },
             drawerContent = { Drawer(viewModel = recyclerViewModel, recyclerViewModel::swapTheme) },
             content = {
                 Column(Modifier.fillMaxSize()) {
-                    Box() {
+                    Box {
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -103,6 +108,9 @@ class MainActivity : ComponentActivity() {
                     viewModel = recyclerViewModel, displayWidth =
                     (resources.displayMetrics.widthPixels / resources.displayMetrics.density).dp
                 )
+            },
+            snackbarHost = {
+                //Text(text = "1234")
             }
         )
     }
