@@ -63,7 +63,8 @@ fun DraggableFile(
         label = "cardBgColorTransition",
         transitionSpec = { tween(durationMillis = ANIMATION_DURATION) },
         targetValueByState = {
-            if (isRevealed) cardExpandedBackgroundColor else cardCollapsedBackgroundColor
+            if (selected) (if (isRevealed) Color.Cyan else Color.Magenta)
+            else (if (isRevealed) cardExpandedBackgroundColor else cardCollapsedBackgroundColor)
         }
     )
     val offsetTransition by transition.animateFloat(
@@ -101,18 +102,13 @@ fun DraggableFile(
             }
         }
 
-    val backgroundColor by animateColorAsState(
-        targetValue = if (selected) Color.Green else Color.White,
-        animationSpec = tween(durationMillis = 500, easing = LinearEasing)
-    )
-
     Card(
         modifier = modifier.combinedClickable(
             onClick = onItemClick,
             onLongClick = onItemLongClick
         ),
-        backgroundColor = backgroundColor,
-        shape = RoundedCornerShape(0.dp),
+        backgroundColor = cardBgColor,
+        shape = RoundedCornerShape(5.dp),
         elevation = cardElevation,
         content = {
             FileTitle(

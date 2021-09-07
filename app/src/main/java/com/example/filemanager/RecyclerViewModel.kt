@@ -103,13 +103,7 @@ class RecyclerViewModel : ViewModel() {
 
     fun newPath(path: String) {
         _path.value = path
-        viewModelScope.launch(Dispatchers.Default) {
-            val testList =
-                File(_path.value).listFiles().toList().filter { it.name.contains(request) }
-                    .convertToFileItem()
-            /*.sortByCondition(typeOfGrouping.value, sortingType.value, sortingOrder.value)*/
-            _files.emit(testList)
-        }
+        getFiles()
         pathStack.add(_path.value)
     }
 
@@ -118,6 +112,7 @@ class RecyclerViewModel : ViewModel() {
     fun onBackPressed() {
         pathStack.removeLast()
         _path.value = pathStack.last()
+        getFiles()
     }
 
     fun isSelectedItem(name: String) = _selectedItems.value.contains(name)

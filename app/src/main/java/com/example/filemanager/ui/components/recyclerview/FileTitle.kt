@@ -47,7 +47,6 @@ fun FileTitle(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colors.background)
             .animateContentSize()
     ) {
         Row(

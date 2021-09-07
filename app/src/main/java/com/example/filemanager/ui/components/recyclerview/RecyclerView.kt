@@ -2,6 +2,7 @@
 
 package com.example.filemanager.ui.components.recyclerview
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,7 +27,8 @@ fun RecyclerView(viewModel: RecyclerViewModel) {
     val files by viewModel.files.collectAsState()
     val revealedFiles by viewModel.revealedFiles.collectAsState()
     val favoriteFiles by viewModel.favoriteFiles.collectAsState()
-    Scaffold(backgroundColor = Color.White) {
+    val selectedFiles by viewModel.selectedItems.collectAsState()
+    Box {
         LazyColumn {
             items(items = files) { item ->
 
@@ -51,7 +53,7 @@ fun RecyclerView(viewModel: RecyclerViewModel) {
                         item = item,
                         info = info,
                         edit = edit,
-                        selected = viewModel.isSelectedItem(item.fileName),
+                        selected = selectedFiles.contains(item.fileName),
                         isRevealed = revealedFiles.contains(item.fileName),
                         cardHeight = CARD_HEIGHT.dp,
                         cardOffset = CARD_OFFSET.dp(),
