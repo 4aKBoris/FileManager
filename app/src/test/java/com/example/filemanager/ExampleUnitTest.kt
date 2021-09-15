@@ -3,6 +3,7 @@ package com.example.filemanager
 import org.junit.Test
 
 import org.junit.Assert.*
+import kotlin.math.absoluteValue
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -12,6 +13,7 @@ import org.junit.Assert.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        val list = listOf(1, 3, -800, -45, -10, -100)
+        println(list.sortedBy { it.absoluteValue })
     }
 }

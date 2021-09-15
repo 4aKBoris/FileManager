@@ -20,7 +20,7 @@ class Sort(
         }
         TypeOfGrouping.FILES -> {
             val directories = files.filter { it.isDirectory }
-            val file = files.filterNot { it.isDirectory }
+            val file = files.filter { it.isFile }
             when (sortingType) {
                 SortingType.ALPHABET -> sortFileName(file, sortingOrder).plus(
                     sortFileName(
@@ -57,7 +57,7 @@ class Sort(
         }
         TypeOfGrouping.FOLDERS -> {
             val directories = files.filter { it.isDirectory }
-            val file = files.filterNot { it.isDirectory }
+            val file = files.filter { it.isFile }
             when (sortingType) {
                 SortingType.ALPHABET -> sortFileName(directories, sortingOrder).plus(
                     sortFileName(
@@ -95,10 +95,10 @@ class Sort(
     }
 
     private fun sortFileName(files: List<FileItem>, sortingOrder: SortingOrder) =
-        if (sortingOrder == SortingOrder.DESCENDING) files.sortedByDescending { it.fileName } else files.sortedBy { it.fileName }
+        if (sortingOrder == SortingOrder.DESCENDING) files.sortedByDescending { it.name } else files.sortedBy { it.name }
 
     private fun sortFileSize(files: List<FileItem>, sortingOrder: SortingOrder) =
-        if (sortingOrder == SortingOrder.DESCENDING) files.sortedByDescending { it.fileSize } else files.sortedBy { it.fileSize }
+        if (sortingOrder == SortingOrder.DESCENDING) files.sortedByDescending { it.size } else files.sortedBy { it.size }
 
     private fun sortDateCreate(files: List<FileItem>, sortingOrder: SortingOrder) =
         if (sortingOrder == SortingOrder.DESCENDING) files.sortedByDescending { it.dateCreate } else files.sortedBy { it.dateCreate }

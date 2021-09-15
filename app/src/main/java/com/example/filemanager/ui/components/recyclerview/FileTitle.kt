@@ -2,15 +2,12 @@
 
 package com.example.filemanager.ui.components.recyclerview
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -18,9 +15,6 @@ import androidx.compose.material.icons.filled.ArrowCircleUp
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,10 +22,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.filemanager.extensions.String
 import com.example.filemanager.item.FileItem
-import java.text.SimpleDateFormat
-import java.util.*
 
 @ExperimentalFoundationApi
 @OptIn(ExperimentalAnimationApi::class)
@@ -55,7 +46,7 @@ fun FileTitle(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(20.dp, 5.dp)
         ) {
-            FileIcon(drawable = painterResource(id = item.type))
+            FileIcon(drawable = painterResource(id = item.expansion))
             Crossfade(
                 targetState = edit,
                 animationSpec = tween(durationMillis = 500, easing = LinearEasing)
@@ -93,7 +84,12 @@ fun FileTitle(
 }
 
 @Composable
-private fun EditFileName(text: String, setText: (String) -> Unit, onCancelEdit: () -> Unit, onEdit: () -> Unit) {
+private fun EditFileName(
+    text: String,
+    setText: (String) -> Unit,
+    onCancelEdit: () -> Unit,
+    onEdit: () -> Unit
+) {
     Box(modifier = Modifier.fillMaxWidth()) {
         TextField(
             value = text, onValueChange = setText,
@@ -137,16 +133,16 @@ private fun InfoAboutFile(item: FileItem, onClose: () -> Unit) {
             .fillMaxWidth()
             .padding(all = 16.dp)
     ) {
-        ButtonClose("Папка: ", item.isDirectory.String(), onClose = onClose)
+        ButtonClose("Тип: ", item.type.name, onClose = onClose)
         InfoAboutFileText(
             if (item.isDirectory) "Количество объектов в папке" else "Размер файла: ",
-            item.size
+            item.stringSize
         )
-        InfoAboutFileText("Размер в байтах: ", item.fileSize.toString())
+        InfoAboutFileText("Размер в байтах: ", item.size.toString())
         InfoAboutFileText("Полный путь: ", item.path)
-        InfoAboutFileText("Дата создания: ", formatterInfo.format(item.dateCreate))
-        InfoAboutFileText("Дата последнего изменения: ", formatterInfo.format(item.dateChange))
-        InfoAboutFileText("Дата последнего открытия: ", formatterInfo.format(item.dateAccess))
+        InfoAboutFileText("Дата создания: ", item.fullDateCreate)
+        InfoAboutFileText("Дата последнего изменения: ", item.partialDateChange)
+        InfoAboutFileText("Дата последнего открытия: ", item.fullDateAccess)
     }
 }
 
@@ -180,14 +176,14 @@ private fun InfoText(item: FileItem) {
             .fillMaxWidth()
             .padding(start = 20.dp), horizontalAlignment = Alignment.Start
     ) {
-        MainText(fileName = item.fileName)
+        MainText(fileName = item.name)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            SecondaryText(text = item.size)
-            SecondaryText(text = formatter.format(item.dateChange))
+            SecondaryText(text = item.stringSize)
+            SecondaryText(text = item.partialDateChange)
         }
     }
 }
@@ -218,7 +214,3 @@ private fun FileIcon(drawable: Painter) {
         modifier = Modifier.size(50.dp)
     )
 }
-
-@SuppressLint("WeekBasedYear")
-private val formatter = SimpleDateFormat("dd.MM.YYYY", Locale.ENGLISH)
-private val formatterInfo = SimpleDateFormat("HH:mm:ss dd-MM-yyyy", Locale.ENGLISH)

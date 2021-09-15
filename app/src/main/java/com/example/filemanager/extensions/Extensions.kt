@@ -45,11 +45,9 @@ fun File.sizeString(): String {
     }
 }
 
-fun List<File>.convertToFileItem() = this.map { FileItem(it) }
+fun List<File>.convertToFileItem() = this.map { FileItem(it, it.absolutePath) }
 
 fun Float.dp(): Float = this * density + 0.5f
 
 val density: Float
     get() = Resources.getSystem().displayMetrics.density
-
-fun Boolean.String(): String = if (this) "Да" else "Нет"

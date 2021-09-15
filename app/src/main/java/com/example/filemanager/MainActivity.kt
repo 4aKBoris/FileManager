@@ -14,16 +14,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.filemanager.ui.components.bar.bottom.BottomBar
-import com.example.filemanager.ui.components.drawer.Drawer
-import com.example.filemanager.ui.components.recyclerview.RecyclerView
-import com.example.filemanager.ui.components.bar.top.TopBar
 import com.example.filemanager.ui.components.TopBarSort
 import com.example.filemanager.ui.components.TopBarStorage
+import com.example.filemanager.ui.components.bar.bottom.BottomBar
+import com.example.filemanager.ui.components.bar.top.TopBar
+import com.example.filemanager.ui.components.drawer.Drawer
+import com.example.filemanager.ui.components.recyclerview.RecyclerView
 import com.example.filemanager.ui.theme.FileManagerTheme
 import kotlinx.coroutines.launch
 
@@ -70,7 +71,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainContent() {
 
-        val scaffoldState = rememberScaffoldState(rememberDrawerState(DrawerValue.Closed), SnackbarHostState())
+        val scaffoldState =
+            rememberScaffoldState(rememberDrawerState(DrawerValue.Closed), SnackbarHostState())
 
         val scope = rememberCoroutineScope()
 
@@ -79,9 +81,6 @@ class MainActivity : ComponentActivity() {
                 scaffoldState.drawerState.open()
             }
         }
-
-        val errorMessage by recyclerViewModel.errorMessage.collectAsState()
-
 
         Scaffold(
             topBar = { TopBar(viewModel = recyclerViewModel, openDrawer = { openDrawer() }) },
@@ -95,7 +94,7 @@ class MainActivity : ComponentActivity() {
                                 .align(Alignment.CenterStart)
                         ) {
                             topBarStorage.TopBarStorage()
-                            RecyclerView(recyclerViewModel)
+                            RecyclerView(viewModel = recyclerViewModel, state = scaffoldState.snackbarHostState)
                         }
                         topBarSort.TopBarSort(modifier = Modifier.align(Alignment.BottomCenter))
                     }
@@ -109,9 +108,6 @@ class MainActivity : ComponentActivity() {
                     (resources.displayMetrics.widthPixels / resources.displayMetrics.density).dp
                 )
             },
-            snackbarHost = {
-                //Text(text = "1234")
-            }
         )
     }
 }

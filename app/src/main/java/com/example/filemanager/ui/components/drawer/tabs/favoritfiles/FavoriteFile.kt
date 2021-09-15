@@ -1,6 +1,6 @@
 package com.example.filemanager.ui.components.drawer.tabs.favoritfiles
 
-import com.example.filemanager.FileTypes
+import com.example.filemanager.item.FileTypes
 import java.io.File
 
 data class FavoriteFile(val path: String) {
