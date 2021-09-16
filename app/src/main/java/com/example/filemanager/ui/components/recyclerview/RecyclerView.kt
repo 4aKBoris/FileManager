@@ -61,7 +61,7 @@ fun RecyclerView(viewModel: RecyclerViewModel, state: SnackbarHostState) {
                         info = info,
                         edit = edit,
                         text = text,
-                        selected = selectedItems.contains(item.name),
+                        selected = selectedItems.contains(item.file),
                         isRevealed = revealedItems.contains(item.name),
                         cardHeight = CARD_HEIGHT.dp,
                         cardOffset = CARD_OFFSET.dp(),

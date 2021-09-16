@@ -10,6 +10,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.filemanager.constants.STORAGE
+import com.example.filemanager.constants.pathDeleteFiles
 import com.example.filemanager.extensions.convertToFileItem
 import com.example.filemanager.extensions.sortByCondition
 import com.example.filemanager.item.FileItem
@@ -32,10 +33,8 @@ class RecyclerViewModel : ViewModel() {
     private val _typeOfGrouping = MutableStateFlow(TypeOfGrouping.DEFAULT)
     private val _revealedFiles = MutableStateFlow(listOf<String>())
     private val _favoriteFiles = MutableStateFlow(listOf<String>())
-    private val _selectedItems = MutableStateFlow(listOf<String>())
+    private val _selectedItems = MutableStateFlow(mutableStateListOf<File>())
     private val _selectionMode = MutableStateFlow(false)
-    private val _errorMessage = MutableStateFlow("")
-    private val _labelSnackBar = MutableStateFlow<String?>(null)
     private val _files = MutableStateFlow(mutableStateListOf<FileItem>())
 
     val path: StateFlow<String> get() = _path
@@ -44,11 +43,21 @@ class RecyclerViewModel : ViewModel() {
     val typeOfGrouping: MutableStateFlow<TypeOfGrouping> get() = _typeOfGrouping
     val revealedFiles: StateFlow<List<String>> get() = _revealedFiles
     val favoriteFiles: StateFlow<List<String>> get() = _favoriteFiles
-    val selectedItems: StateFlow<List<String>> get() = _selectedItems
+    val selectedItems: StateFlow<SnapshotStateList<File>> get() = _selectedItems
     val selectionMode: StateFlow<Boolean> get() = _selectionMode
-    val errorMessage: StateFlow<String> get() = _errorMessage
-    val labelSnackBar: StateFlow<String?> get() = _labelSnackBar
     val files: StateFlow<SnapshotStateList<FileItem>> get() = _files
+
+    private fun removeItem(file: File) {
+        indexDeleteFiles[file.name] = findIndex(file)
+        _files.value.removeIf { it.file == file }
+    }
+
+    fun addItem(file: File, index: Int? = null) {
+        if (index == null) _files.value.add(element = FileItem(file))
+        else _files.value.add(index = index, element = FileItem(file))
+    }
+
+    private fun findIndex(file: File) = _files.value.indexOf(_files.value.find { it.file == file })
 
     fun onClickFavoriteFile(path: String) {
         if (_favoriteFiles.value.contains(path)) onDeleteFavoriteFile(path = path) else onAddFavoriteFile(
@@ -117,19 +126,18 @@ class RecyclerViewModel : ViewModel() {
     }
 
 
-    private fun addSelectedItem(name: String) {
-        _selectedItems.value = _selectedItems.value.toMutableList().also { list -> list.add(name) }
+    private fun addSelectedItem(file: File) {
+        _selectedItems.value.add(file)
     }
 
-    private fun removeSelectedItem(name: String) {
-        _selectedItems.value =
-            _selectedItems.value.toMutableList().also { list -> list.remove(name) }
+    private fun removeSelectedItem(file: File) {
+        _selectedItems.value.remove(file)
     }
 
     fun onClick(item: FileItem) {
         when (_selectionMode.value) {
-            true -> if (_selectedItems.value.contains(item.name)) removeSelectedItem(item.name) else addSelectedItem(
-                item.name
+            true -> if (_selectedItems.value.contains(item.file)) removeSelectedItem(item.file) else addSelectedItem(
+                item.file
             )
             else -> if (item.isDirectory) addPath(item.name)
         }
@@ -141,7 +149,7 @@ class RecyclerViewModel : ViewModel() {
 
 
     private fun clearSelectedItems() {
-        _selectedItems.value = listOf()
+        _selectedItems.value.clear()
     }
 
     fun swapSelectionMode() {
@@ -175,6 +183,40 @@ class RecyclerViewModel : ViewModel() {
         }
     }
 
+    fun deleteFiles(): String {
+        val notDeleteFiles = mutableListOf<String>()
+        _selectedItems.value.forEach {
+            it.copyTo(File("$pathDeleteFiles/${it.name}"), true)
+            if (it.deleteRecursively()) removeItem(it) else notDeleteFiles.add(it.name)
+        }
+        clearSelectedItems()
+        return if (notDeleteFiles.isEmpty()) "Все выбранные папки и файлы удалены!" else "Не удалось удалить следующие файлы и папки: ${
+            notDeleteFiles.joinToString(
+                ", "
+            )
+        }"
+    }
+
+    fun confirmDeleteFiles() {
+        val list = File(pathDeleteFiles).listFiles()
+        if (list.isNotEmpty()) list.forEach {
+            if (it.isDirectory) it.deleteRecursively() else it.delete()
+        }
+        indexDeleteFiles.clear()
+    }
+
+    fun cancelDeleteFiles() {
+        val list = File(pathDeleteFiles).listFiles()
+        if (list.isNotEmpty()) list.forEach {
+            addItem(
+                it.copyTo(File("${_path.value}/${it.name}"), true),
+                indexDeleteFiles.remove(it.name)
+            )
+            if (it.isDirectory) it.deleteRecursively() else it.delete()
+        }
+        indexDeleteFiles.clear()
+    }
+
     var request by mutableStateOf("")
 
     var sortMenuVisible by mutableStateOf(false)
@@ -193,5 +235,9 @@ class RecyclerViewModel : ViewModel() {
 
     fun swapTheme() {
         theme = theme.not()
+    }
+
+    companion object {
+        private val indexDeleteFiles = mutableMapOf<String, Int>()
     }
 }

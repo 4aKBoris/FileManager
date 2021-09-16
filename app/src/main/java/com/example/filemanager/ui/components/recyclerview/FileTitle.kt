@@ -141,7 +141,7 @@ private fun InfoAboutFile(item: FileItem, onClose: () -> Unit) {
         InfoAboutFileText("Размер в байтах: ", item.size.toString())
         InfoAboutFileText("Полный путь: ", item.path)
         InfoAboutFileText("Дата создания: ", item.fullDateCreate)
-        InfoAboutFileText("Дата последнего изменения: ", item.partialDateChange)
+        InfoAboutFileText("Дата последнего изменения: ", item.fullDateChange)
         InfoAboutFileText("Дата последнего открытия: ", item.fullDateAccess)
     }
 }

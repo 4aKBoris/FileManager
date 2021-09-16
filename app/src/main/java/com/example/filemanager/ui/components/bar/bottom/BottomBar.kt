@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.ChangeCircle
@@ -29,14 +27,24 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.example.filemanager.RecyclerViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp) {
+fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp, state: SnackbarHostState) {
 
     val infiniteTransition = rememberInfiniteTransition()
+
+    val scope = rememberCoroutineScope()
+
     val borderFloat = FloatArray(5)
+
     val scaleFloat = FloatArray(5)
+
+    val selectMode by viewModel.selectionMode.collectAsState()
+
+    val enabled = viewModel.selectedItems.value.isNotEmpty()
+
     for (i in 0 until 5) {
         val time = 5000 * i
         val sF by infiniteTransition.animateFloat(
@@ -57,6 +65,7 @@ fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp) {
                 repeatMode = RepeatMode.Restart
             )
         )
+
         scaleFloat[i] = sF
         val bF by infiniteTransition.animateFloat(
             initialValue = 0f,
@@ -75,8 +84,6 @@ fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp) {
         borderFloat[i] = bF
     }
 
-    val selectMode by viewModel.selectionMode.collectAsState()
-
     Box(
         modifier = Modifier
             .fillMaxWidth(),
@@ -88,6 +95,7 @@ fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp) {
             scaleFloat = scaleFloat[BottomBarButtons.CONFIRM.number],
             displayWidth = displayWidth,
             properties = BottomBarButtons.CONFIRM,
+            enabled = enabled,
             onClick = {})
         CircleButton(
             selectMode = selectMode,
@@ -95,6 +103,7 @@ fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp) {
             scaleFloat = scaleFloat[BottomBarButtons.COPY.number],
             displayWidth = displayWidth,
             properties = BottomBarButtons.COPY,
+            enabled = enabled,
             onClick = {})
         CircleButton(
             selectMode = selectMode,
@@ -102,6 +111,7 @@ fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp) {
             scaleFloat = scaleFloat[BottomBarButtons.MOVE.number],
             displayWidth = displayWidth,
             properties = BottomBarButtons.MOVE,
+            enabled = enabled,
             onClick = {})
         CircleButton(
             selectMode = selectMode,
@@ -109,11 +119,31 @@ fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp) {
             scaleFloat = scaleFloat[BottomBarButtons.DELETE.number],
             displayWidth = displayWidth,
             properties = BottomBarButtons.DELETE,
-            onClick = {})
+            enabled = enabled,
+            onClick = {
+                val message = viewModel.deleteFiles()
+                scope.launch {
+                    val s = state.showSnackbar(
+                        message = message,
+                        actionLabel = "Отмена",
+                        duration = SnackbarDuration.Long
+                    )
+                    when (s) {
+                        SnackbarResult.Dismissed -> {
+                            viewModel.confirmDeleteFiles()
+                        }
+                        SnackbarResult.ActionPerformed -> {
+                            viewModel.cancelDeleteFiles()
+                            state.showSnackbar(message = "Удаление файлов и папок отменено!", null, SnackbarDuration.Short)
+                        }
+                    }
+                }
+            })
         CircleButton(
             borderFloat = borderFloat[BottomBarButtons.SELECT.number],
             displayWidth = displayWidth,
             properties = BottomBarButtons.SELECT,
+            enabled = true,
             onClick = viewModel::swapSelectionMode
         ) {
             ButtonIcon(
@@ -131,6 +161,7 @@ private fun CircleButton(
     borderFloat: Float,
     scaleFloat: Float,
     displayWidth: Dp,
+    enabled: Boolean,
     properties: BottomBarButtons,
     onClick: () -> Unit,
 ) {
@@ -155,6 +186,7 @@ private fun CircleButton(
             borderFloat = borderFloat,
             displayWidth = displayWidth,
             properties = properties,
+            enabled = enabled,
             onClick = onClick
         ) {
             ButtonIcon(properties = properties, scaleFloat = scaleFloat)
@@ -167,6 +199,7 @@ private fun CircleButton(
     borderFloat: Float,
     displayWidth: Dp,
     properties: BottomBarButtons,
+    enabled: Boolean,
     onClick: () -> Unit,
     icon: @Composable () -> Unit
 ) {
@@ -191,7 +224,8 @@ private fun CircleButton(
             .offset(x = -(displayWidth / 5 * (properties.number)))
     ) {
         IconButton(
-            onClick = { onClick() },
+            onClick = onClick,
+            enabled = enabled,
             modifier = Modifier
                 .padding(vertical = 5.dp)
                 .background(

@@ -27,6 +27,7 @@ import com.example.filemanager.ui.components.drawer.Drawer
 import com.example.filemanager.ui.components.recyclerview.RecyclerView
 import com.example.filemanager.ui.theme.FileManagerTheme
 import kotlinx.coroutines.launch
+import java.io.File
 
 class MainActivity : ComponentActivity() {
 
@@ -42,6 +43,10 @@ class MainActivity : ComponentActivity() {
 
         val p = Permissions()
         p.requestMultiplePermissions(this, 0)
+
+        val r = baseContext.filesDir.absolutePath
+        println(r)
+        println(File("DeleteFiles").mkdir())
 
         topBarStorage = TopBarStorage(recyclerViewModel)
 
@@ -94,7 +99,10 @@ class MainActivity : ComponentActivity() {
                                 .align(Alignment.CenterStart)
                         ) {
                             topBarStorage.TopBarStorage()
-                            RecyclerView(viewModel = recyclerViewModel, state = scaffoldState.snackbarHostState)
+                            RecyclerView(
+                                viewModel = recyclerViewModel,
+                                state = scaffoldState.snackbarHostState
+                            )
                         }
                         topBarSort.TopBarSort(modifier = Modifier.align(Alignment.BottomCenter))
                     }
@@ -104,8 +112,10 @@ class MainActivity : ComponentActivity() {
             scaffoldState = scaffoldState,
             bottomBar = {
                 BottomBar(
-                    viewModel = recyclerViewModel, displayWidth =
-                    (resources.displayMetrics.widthPixels / resources.displayMetrics.density).dp
+                    viewModel = recyclerViewModel,
+                    displayWidth =
+                    (resources.displayMetrics.widthPixels / resources.displayMetrics.density).dp,
+                    state = scaffoldState.snackbarHostState
                 )
             },
         )

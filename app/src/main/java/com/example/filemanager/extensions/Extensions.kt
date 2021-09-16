@@ -45,7 +45,7 @@ fun File.sizeString(): String {
     }
 }
 
-fun List<File>.convertToFileItem() = this.map { FileItem(it, it.absolutePath) }
+fun List<File>.convertToFileItem() = this.map { FileItem(it) }
 
 fun Float.dp(): Float = this * density + 0.5f
 

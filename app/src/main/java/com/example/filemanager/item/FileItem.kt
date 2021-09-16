@@ -12,10 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.text.SimpleDateFormat
 import java.util.*
 
-data class FileItem(
-    val file: File,
-    val oldPath: String
-) {
+data class FileItem(val file: File) {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private val attr = Files.readAttributes(file.toPath(), BasicFileAttributes::class.java)
@@ -70,7 +67,7 @@ data class FileItem(
                 ) || name.takeLastWhile { t -> t != '.' } !in types.keys
             ) FILE else name.takeLastWhile { t -> t != '.' }]
 
-    override fun toString(): String = "path = $path; name = $name"
+    override fun toString(): String = path
 
     companion object {
         @SuppressLint("WeekBasedYear")
