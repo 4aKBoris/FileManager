@@ -14,7 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.filemanager.RecyclerViewModel
+import com.example.filemanager.view.model.FileManagerViewModel
 import com.example.filemanager.extensions.dp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -25,9 +25,9 @@ const val CARD_OFFSET = 168f // we have 3 icons in a row, so that's 56 * 3
 
 @ExperimentalCoroutinesApi
 @Composable
-fun RecyclerView(viewModel: RecyclerViewModel, state: SnackbarHostState) {
+fun RecyclerView(viewModel: FileManagerViewModel, state: SnackbarHostState) {
 
-    val items by viewModel.files.collectAsState()
+    val items = viewModel.files
     val selectedItems by viewModel.selectedItems.collectAsState()
     val revealedItems by viewModel.revealedFiles.collectAsState()
     val favoriteItems by viewModel.favoriteFiles.collectAsState()
@@ -47,7 +47,7 @@ fun RecyclerView(viewModel: RecyclerViewModel, state: SnackbarHostState) {
                         size = ACTION_ITEM_SIZE.dp,
                         favoriteFile = favoriteItems.contains(item.path),
                         onInfo = {
-                            viewModel.onItemCollapsed(item.name)
+                            viewModel.onItemExpanded(item.name)
                             info = true
                         },
                         onFavorite = { viewModel.onClickFavoriteFile(item.path) },
@@ -86,7 +86,7 @@ fun RecyclerView(viewModel: RecyclerViewModel, state: SnackbarHostState) {
                             }
                             edit = false
                         },
-                        onExpand = { viewModel.onItemExpanded(item.name, edit || info) },
+                        onExpand = { viewModel.onItemExpanded(item.name) },
                         onCollapse = { viewModel.onItemCollapsed(item.name) },
                         onItemClick = { viewModel.onClick(item) },
                         onItemLongClick = { viewModel.onLongClick(item) },

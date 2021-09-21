@@ -7,12 +7,12 @@ import com.example.filemanager.sort.Sort
 import com.example.filemanager.item.FileItem
 import com.example.filemanager.sort.SortingOrder
 import com.example.filemanager.sort.SortingType
-import com.example.filemanager.sort.TypeOfGrouping
+import com.example.filemanager.sort.GroupingType
 import java.io.File
 import kotlin.math.pow
 
-fun List<FileItem>.sortByCondition(typeOfGrouping: TypeOfGrouping, sortingType: SortingType, sortingOrder: SortingOrder) =
-    Sort(this, typeOfGrouping, sortingType, sortingOrder).sort()
+fun List<FileItem>.sortByCondition(groupingType: GroupingType, sortingType: SortingType, sortingOrder: SortingOrder) =
+    Sort(this, groupingType, sortingType, sortingOrder).sort()
 
 fun File.sizeString(): String {
 

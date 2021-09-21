@@ -26,13 +26,47 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.example.filemanager.RecyclerViewModel
+import com.example.filemanager.view.model.FileManagerViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp, state: SnackbarHostState) {
+fun BottomBar(viewModel: FileManagerViewModel, displayWidth: Dp, state: SnackbarHostState) {
 
+    var copy by remember { mutableStateOf(false) }
+
+    var move by remember { mutableStateOf(false) }
+
+    val hide = fun() {
+        move = false
+        copy = false
+    }
+
+    Crossfade(
+        targetState = copy || move, animationSpec =
+        tween(durationMillis = 1000, easing = LinearEasing)
+    ) {
+        when (it) {
+            false -> BottomBarMenu(
+                viewModel = viewModel,
+                displayWidth = displayWidth,
+                state = state,
+                onCopyClick = { copy = true },
+                onMoveClick = { move = true }
+            )
+            else -> BottomBarMoveAndCopy(onCancelClick = hide, onPasteClick = hide)
+        }
+    }
+}
+
+@Composable
+private fun BottomBarMenu(
+    viewModel: FileManagerViewModel,
+    displayWidth: Dp,
+    state: SnackbarHostState,
+    onCopyClick: () -> Unit,
+    onMoveClick: () -> Unit
+) {
     val infiniteTransition = rememberInfiniteTransition()
 
     val scope = rememberCoroutineScope()
@@ -104,7 +138,8 @@ fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp, state: SnackbarHos
             displayWidth = displayWidth,
             properties = BottomBarButtons.COPY,
             enabled = enabled,
-            onClick = {})
+            onClick = onCopyClick
+        )
         CircleButton(
             selectMode = selectMode,
             borderFloat = borderFloat[BottomBarButtons.MOVE.number],
@@ -112,7 +147,8 @@ fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp, state: SnackbarHos
             displayWidth = displayWidth,
             properties = BottomBarButtons.MOVE,
             enabled = enabled,
-            onClick = {})
+            onClick = onMoveClick
+        )
         CircleButton(
             selectMode = selectMode,
             borderFloat = borderFloat[BottomBarButtons.DELETE.number],
@@ -134,7 +170,11 @@ fun BottomBar(viewModel: RecyclerViewModel, displayWidth: Dp, state: SnackbarHos
                         }
                         SnackbarResult.ActionPerformed -> {
                             viewModel.cancelDeleteFiles()
-                            state.showSnackbar(message = "Удаление файлов и папок отменено!", null, SnackbarDuration.Short)
+                            state.showSnackbar(
+                                message = "Удаление файлов и папок отменено!",
+                                null,
+                                SnackbarDuration.Short
+                            )
                         }
                     }
                 }

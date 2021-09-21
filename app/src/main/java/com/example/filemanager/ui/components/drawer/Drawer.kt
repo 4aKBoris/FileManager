@@ -4,6 +4,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.DrawerState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconToggleButton
 import androidx.compose.material.Scaffold
@@ -18,15 +19,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.filemanager.RecyclerViewModel
-import com.example.filemanager.ui.components.drawer.tabs.Tab
-import com.example.filemanager.ui.components.drawer.tabs.TabRow
-import com.example.filemanager.ui.components.drawer.tabs.Tabs
+import com.example.filemanager.ui.components.drawer.tabs.*
+import com.example.filemanager.ui.components.drawer.tabs.settings.Settings
+import com.example.filemanager.view.model.FileManagerViewModel
 
 @Composable
 fun Drawer(
-    viewModel: RecyclerViewModel,
-    swapTheme: () -> Unit
+    viewModel: FileManagerViewModel,
+    closeDrawer: () -> Unit
 ) {
 
     val allScreens = Tab.values().toList()
@@ -39,35 +39,14 @@ fun Drawer(
                 onTabSelected = { screen -> currentScreen = screen },
                 currentScreen = currentScreen
             )
-        },
-        bottomBar = {
-            Box(
-                modifier = Modifier.fillMaxWidth().height(60.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                IconToggleButton(
-                    checked = viewModel.theme,
-                    onCheckedChange = { swapTheme() },
-                    modifier = Modifier.padding(end = 15.dp)
-                ) {
-                    Crossfade(
-                        targetState = viewModel.theme,
-                        animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
-                    ) {
-                        Icon(
-                            imageVector = if (it) Icons.Default.DarkMode else Icons.Default.LightMode,
-                            contentDescription = "Смена темы"
-                        )
-                    }
-                }
-            }
         }) { innerPadding ->
         Box(Modifier.padding(innerPadding)) {
-            currentScreen.content(
-                onScreenChange = { screen ->
-                    currentScreen = Tab.valueOf(screen)
-                }
-            )
+            when(currentScreen) {
+                Tab.Disks -> {}
+                Tab.LastFiles -> LastFiles(viewModel = viewModel, closeDrawer = closeDrawer)
+                Tab.FavoriteFiles -> FavoriteFiles(viewModel = viewModel, closeDrawer = closeDrawer)
+                Tab.Settings -> Settings(viewModel = viewModel)
+            }
         }
     }
 }

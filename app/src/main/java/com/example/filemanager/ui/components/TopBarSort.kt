@@ -32,11 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import com.example.filemanager.R
-import com.example.filemanager.RecyclerViewModel
+import com.example.filemanager.view.model.FileManagerViewModel
 import com.example.filemanager.sort.SortingOrder
 import com.example.filemanager.sort.SortingType
 
-class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWindow: Float) {
+class TopBarSort(private val viewModel: FileManagerViewModel, private val widthWindow: Float) {
 
     @OptIn(ExperimentalAnimationApi::class)
     @Composable
@@ -63,7 +63,7 @@ class TopBarSort(private val viewModel: RecyclerViewModel, private val widthWind
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     fun OnClick(number: Int) {
-                        viewModel.sortingType.value = SortingType.values()[number]
+                        viewModel.setSortingType(SortingType.values()[number].id)
                         viewModel.swapSortingOrder()
                     }
 

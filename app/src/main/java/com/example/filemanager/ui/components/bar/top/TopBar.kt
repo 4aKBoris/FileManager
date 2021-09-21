@@ -17,12 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.example.filemanager.RecyclerViewModel
+import com.example.filemanager.view.model.FileManagerViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun TopBar(viewModel: RecyclerViewModel, openDrawer: () -> Unit) {
+fun TopBar(viewModel: FileManagerViewModel, openDrawer: () -> Unit) {
 
     TopAppBar(
 
@@ -61,7 +61,7 @@ fun TopBar(viewModel: RecyclerViewModel, openDrawer: () -> Unit) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun SearchTextField(viewModel: RecyclerViewModel) {
+private fun SearchTextField(viewModel: FileManagerViewModel) {
 
     var visible by remember { mutableStateOf(false) }
 

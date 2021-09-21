@@ -2,11 +2,11 @@
 
 package com.example.filemanager
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
@@ -15,10 +15,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.ViewModelProvider
 import com.example.filemanager.ui.components.TopBarSort
 import com.example.filemanager.ui.components.TopBarStorage
 import com.example.filemanager.ui.components.bar.bottom.BottomBar
@@ -26,12 +30,17 @@ import com.example.filemanager.ui.components.bar.top.TopBar
 import com.example.filemanager.ui.components.drawer.Drawer
 import com.example.filemanager.ui.components.recyclerview.RecyclerView
 import com.example.filemanager.ui.theme.FileManagerTheme
+import com.example.filemanager.view.model.FileManagerViewModel
+import com.example.filemanager.view.model.FileManagerViewModelFactory
 import kotlinx.coroutines.launch
-import java.io.File
+
+private const val DATA_STORE_FILE_MANAGER = "data_store_file_manager"
+
+private val Context.dataStoreFileManager by preferencesDataStore(name = DATA_STORE_FILE_MANAGER)
 
 class MainActivity : ComponentActivity() {
 
-    private val recyclerViewModel: RecyclerViewModel by viewModels()
+    private lateinit var viewModel: FileManagerViewModel
 
     private lateinit var topBarStorage: TopBarStorage
 
@@ -41,20 +50,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val p = Permissions()
-        p.requestMultiplePermissions(this, 0)
+        viewModel = ViewModelProvider(
+            this, FileManagerViewModelFactory(dataStore = dataStoreFileManager, resources = resources)
+        ).get(FileManagerViewModel::class.java)
 
-        val r = baseContext.filesDir.absolutePath
-        println(r)
-        println(File("DeleteFiles").mkdir())
+        lifecycle.addObserver(viewModel)
 
-        topBarStorage = TopBarStorage(recyclerViewModel)
+        requestMultiplePermissions(this, 0)
+
+        topBarStorage = TopBarStorage(viewModel)
 
         topBarSort =
-            TopBarSort(recyclerViewModel, resources.displayMetrics.widthPixels.toFloat() / 2)
+            TopBarSort(viewModel, resources.displayMetrics.widthPixels.toFloat() / 2)
 
         setContent {
-            FileManagerTheme(recyclerViewModel.theme) {
+
+            val theme by viewModel.theme.collectAsState(false)
+
+            FileManagerTheme(theme) {
                 Surface(
                     color = MaterialTheme.colors.background,
                     modifier = Modifier.wrapContentSize()
@@ -68,8 +81,8 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onBackPressed() {
-        if (recyclerViewModel.isEmptyBackStack()) super.onBackPressed()
-        else recyclerViewModel.onBackPressed()
+        if (viewModel.isEmptyBackStack()) super.onBackPressed()
+        else viewModel.onBackPressed()
     }
 
     @OptIn(ExperimentalAnimationApi::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -87,9 +100,15 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        val closeDrawer = {
+            scope.launch {
+                scaffoldState.drawerState.close()
+            }
+        }
+
         Scaffold(
-            topBar = { TopBar(viewModel = recyclerViewModel, openDrawer = { openDrawer() }) },
-            drawerContent = { Drawer(viewModel = recyclerViewModel, recyclerViewModel::swapTheme) },
+            topBar = { TopBar(viewModel = viewModel, openDrawer = { openDrawer() }) },
+            drawerContent = { Drawer(viewModel = viewModel, closeDrawer = { closeDrawer() }) },
             content = {
                 Column(Modifier.fillMaxSize()) {
                     Box {
@@ -100,7 +119,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             topBarStorage.TopBarStorage()
                             RecyclerView(
-                                viewModel = recyclerViewModel,
+                                viewModel = viewModel,
                                 state = scaffoldState.snackbarHostState
                             )
                         }
@@ -112,7 +131,7 @@ class MainActivity : ComponentActivity() {
             scaffoldState = scaffoldState,
             bottomBar = {
                 BottomBar(
-                    viewModel = recyclerViewModel,
+                    viewModel = viewModel,
                     displayWidth =
                     (resources.displayMetrics.widthPixels / resources.displayMetrics.density).dp,
                     state = scaffoldState.snackbarHostState

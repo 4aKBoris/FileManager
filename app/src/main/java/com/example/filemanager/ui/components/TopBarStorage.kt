@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -28,10 +29,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.filemanager.R
-import com.example.filemanager.RecyclerViewModel
+import com.example.filemanager.view.model.FileManagerViewModel
 import com.example.filemanager.constants.STORAGE
 
-class TopBarStorage(private val viewModel: RecyclerViewModel) {
+class TopBarStorage(private val viewModel: FileManagerViewModel) {
 
     @OptIn(ExperimentalAnimationApi::class)
     @Composable
@@ -89,7 +90,7 @@ class TopBarStorage(private val viewModel: RecyclerViewModel) {
                         .horizontalScroll(ScrollState(0)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val path by viewModel.path.collectAsState()
+                    val path by remember { viewModel.path }
                     val p = path.removePrefix(STORAGE).split('/').filterNot { it.isBlank() }
                     Image(
                         painter = painterResource(id = R.drawable.ic_storage),

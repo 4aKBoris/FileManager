@@ -17,9 +17,14 @@ val Typography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
     ),
-    subtitle2 = TextStyle(
+    subtitle1 = TextStyle(
         fontSize = 18.sp,
         fontStyle = FontStyle.Italic,
+        fontFamily = FontFamily.SansSerif
+    ),
+    subtitle2 = TextStyle(
+        fontSize = 16.sp,
+        fontStyle = FontStyle.Normal,
         fontFamily = FontFamily.SansSerif
     ),
     body2 = TextStyle(
@@ -36,5 +41,11 @@ val Typography = Typography(
             blurRadius = Float.fromBits(5)
         ),
         textDecoration = TextDecoration.Underline
+    ),
+    h6 = TextStyle(
+        fontSize = 18.sp,
+        fontStyle = FontStyle.Italic,
+        fontFamily = FontFamily.Serif,
+        fontWeight = FontWeight.W600
     )
 )

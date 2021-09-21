@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -40,7 +41,7 @@ fun TabRow(
         Row(Modifier.selectableGroup()) {
             allScreens.forEach { screen ->
                 Tab(
-                    text = screen.title,
+                    text = stringResource(id = screen.title),
                     icon = screen.icon,
                     onSelected = { onTabSelected(screen) },
                     selected = currentScreen == screen

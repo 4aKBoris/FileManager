@@ -1,47 +1,33 @@
 package com.example.filemanager.ui.components.drawer.tabs
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Storage
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.filemanager.ui.components.drawer.tabs.disks.Disks
+import androidx.compose.ui.res.stringResource
+import com.example.filemanager.R
 
 enum class Tab(
     val icon: ImageVector,
-    val title: String,
-    val body: @Composable ((String) -> Unit) -> Unit
+    @StringRes val title: Int
 ) {
     Disks(
         icon = Icons.Filled.Storage,
-        title = "Диски",
-        body = { Disks() }
+        title = R.string.disks
     ),
     FavoriteFiles(
         icon = Icons.Filled.Favorite,
-        title = "Избранное",
-        body = { com.example.filemanager.ui.components.drawer.tabs.favoritfiles.Favorites() }
+        title = R.string.favorite_files
     ),
     LastFiles(
         icon = Icons.Filled.AccessTime,
-        title = "Последнее",
-        body = { com.example.filemanager.ui.components.drawer.tabs.lastfiles.LastFiles() }
+        title = R.string.last_files
+    ),
+    Settings(
+        icon = Icons.Filled.Settings,
+        title = R.string.settings
     );
-
-    @Composable
-    fun content(onScreenChange: (String) -> Unit) {
-        body(onScreenChange)
-    }
-
-    companion object {
-        fun fromRoute(route: String?): Tab =
-            when (route?.substringBefore("/")) {
-                Disks.name -> Disks
-                FavoriteFiles.name -> FavoriteFiles
-                LastFiles.name -> LastFiles
-                null -> Disks
-                else -> throw IllegalArgumentException("Route $route is not recognized.")
-            }
-    }
 }
