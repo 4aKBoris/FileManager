@@ -28,7 +28,7 @@ fun ActionsRow(
     onEdit: () -> Unit,
 ) {
     Row(
-        Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+        //Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

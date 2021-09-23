@@ -1,25 +1,19 @@
 package com.example.filemanager.ui.components.drawer
 
-import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.DrawerState
-import androidx.compose.material.Icon
-import androidx.compose.material.IconToggleButton
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.example.filemanager.ui.components.drawer.tabs.*
+import com.example.filemanager.ui.components.drawer.tabs.FavoriteFiles
+import com.example.filemanager.ui.components.drawer.tabs.LastFiles
+import com.example.filemanager.ui.components.drawer.tabs.Tab
+import com.example.filemanager.ui.components.drawer.tabs.TabRow
 import com.example.filemanager.ui.components.drawer.tabs.settings.Settings
 import com.example.filemanager.view.model.FileManagerViewModel
 

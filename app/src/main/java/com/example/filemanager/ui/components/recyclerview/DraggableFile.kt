@@ -84,7 +84,7 @@ fun DraggableFile(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            //.padding(horizontal = 16.dp, vertical = 8.dp)
             .offset { IntOffset((offsetX.value + offsetTransition).roundToInt(), 0) }
             .pointerInput(Unit) {
                 detectHorizontalDragGestures { change, dragAmount ->
@@ -107,7 +107,7 @@ fun DraggableFile(
                 onLongClick = onItemLongClick
             ),
         backgroundColor = cardBgColor,
-        shape = RoundedCornerShape(5.dp),
+        shape = RoundedCornerShape(0.dp),
         elevation = cardElevation,
         content = {
             FileTitle(

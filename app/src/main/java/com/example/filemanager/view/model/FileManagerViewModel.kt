@@ -8,8 +8,6 @@ package com.example.filemanager.view.model
 import android.content.res.Resources
 import android.util.Log
 import androidx.annotation.StringRes
-import androidx.compose.material.DrawerValue
-import androidx.compose.material.rememberDrawerState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.datastore.core.DataStore
@@ -39,9 +37,6 @@ class FileManagerViewModel(dataStore: DataStore<Preferences>, private val resour
 
     private val pathStack = mutableListOf<String>(STORAGE)
 
-
-    var request by mutableStateOf("")
-
     private val _path = mutableStateOf(STORAGE)
     private val _sortingType = mutableStateOf(SortingType.DEFAULT)
     private val _sortingOrder = mutableStateOf(SortingOrder.DEFAULT)
@@ -49,6 +44,7 @@ class FileManagerViewModel(dataStore: DataStore<Preferences>, private val resour
     private val _theme = MutableStateFlow(false)
     private val _favoriteFiles = mutableStateListOf<String>()
     private val _lastFiles = mutableStateListOf<String>()
+    private val _request = mutableStateOf("")
 
     private val _revealedFiles = MutableStateFlow(mutableStateListOf<String>())
     private val _selectedItems = MutableStateFlow(mutableStateListOf<File>())
@@ -66,10 +62,14 @@ class FileManagerViewModel(dataStore: DataStore<Preferences>, private val resour
     val selectedItems: StateFlow<List<File>> get() = _selectedItems
     val selectionMode: StateFlow<Boolean> get() = _selectionMode
     val files: SnapshotStateList<FileItem>
-        get() = File(_path.value).listFiles().filter { it.name.contains(request) }
+        get() = File(_path.value).listFiles().filter { it.name.contains(_request.value) }
             .convertToFileItem(resources = resources)
             .sortedWith(_groupingType.value.comparator.then(_sortingOrder.value.getComparator(_sortingType.value.comparator)))
             .toMutableStateList()
+
+    fun onChangeRequest(r: String) {
+        _request.value = r
+    }
 
     fun swapTheme(isDark: Boolean) {
         _theme.value = isDark
@@ -90,10 +90,6 @@ class FileManagerViewModel(dataStore: DataStore<Preferences>, private val resour
     private fun removeItem(file: File) {
         indexDeleteFiles[file.name] = findIndex(file)
         files.removeIf { it.file == file }
-    }
-
-    fun add() {
-        println(_path.value)
     }
 
     fun addItem(file: File, index: Int? = null) {

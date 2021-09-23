@@ -47,5 +47,11 @@
     <string name="gigabyte">GB</string>
     <string name="objects">objects</string>
 
+    <!-- Верхнее меню -->
+    <string name="menu">Menu</string>
+    <string name="file_path">File path</string>
+    <string name="search">Search</string>
+    <string name="stop_searching">Stop searching</string>
+
 
 </resources>
