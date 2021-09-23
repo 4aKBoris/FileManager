@@ -4,20 +4,22 @@ package com.example.filemanager.ui.components.drawer.tabs
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -47,6 +49,7 @@ data class DataTab(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun RecyclerViewTab(
     listItems: List<DataTab>,
@@ -57,20 +60,23 @@ fun RecyclerViewTab(
 ) {
     val state = rememberLazyListState()
 
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
-        LazyColumn(state = state) {
+    Scaffold(modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            AnimatedVisibility(visible = listItems.isNotEmpty()) {
+                BottomButton(
+                    imageVector = imageVector,
+                    description = description,
+                    onClick = onBottomButtonClick
+                )
+            }
+        }) { innerPadding ->
+        LazyColumn(state = state, modifier = Modifier.padding(innerPadding)) {
             items(listItems) {
                 Item(item = it, closeDrawer = closeDrawer)
                 Divider()
             }
         }
-        BottomButton(
-            imageVector = imageVector,
-            description = description,
-            onClick = onBottomButtonClick
-        )
     }
-
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -151,15 +157,28 @@ private fun BottomButton(
     @StringRes description: Int,
     onClick: () -> Unit
 ) {
+
+    val shape = CutCornerShape(topEnd = 8.dp)
+
     IconButton(
         modifier = Modifier
-            .fillMaxWidth().background(MaterialTheme.colors.surface),
+            .fillMaxWidth()
+            .clip(shape = shape)
+            .background(MaterialTheme.colors.surface)
+            .border(
+                width = 2.dp,
+                brush = Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colors.primaryVariant,
+                        MaterialTheme.colors.primary
+                    )
+                ),
+                shape = shape
+            ),
         onClick = onClick,
     ) {
         Row(
-            modifier = Modifier
-                .padding(all = 16.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {

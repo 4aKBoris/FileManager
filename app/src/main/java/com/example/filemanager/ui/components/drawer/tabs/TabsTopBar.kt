@@ -16,6 +16,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -73,7 +74,7 @@ private fun Tab(
     )
     Row(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(12.dp)
             .animateContentSize()
             .height(TabHeight)
             .selectable(
@@ -87,11 +88,12 @@ private fun Tab(
                     color = Color.Unspecified
                 )
             )
-            .clearAndSetSemantics { contentDescription = text }
+            .clearAndSetSemantics { contentDescription = text },
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(imageVector = icon, contentDescription = text, tint = tabTintColor)
         if (selected) {
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(8.dp))
             Text(text = text, color = tabTintColor)
         }
     }

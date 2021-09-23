@@ -31,7 +31,7 @@ fun Tabs(viewModel: FileManagerViewModel) {
 @Composable
 fun FavoriteFiles(viewModel: FileManagerViewModel, closeDrawer: () -> Unit) {
 
-    val list by viewModel.favoriteFiles.collectAsState()
+    val list = viewModel.favoriteFiles
 
     RecyclerViewTab(
         listItems = viewModel.pathToDataTab(
@@ -49,7 +49,7 @@ fun FavoriteFiles(viewModel: FileManagerViewModel, closeDrawer: () -> Unit) {
 @Composable
 fun LastFiles(viewModel: FileManagerViewModel, closeDrawer: () -> Unit) {
 
-    val list by viewModel.lastFiles.collectAsState()
+    val list = viewModel.lastFiles
 
     RecyclerViewTab(
         listItems = viewModel.pathToDataTab(

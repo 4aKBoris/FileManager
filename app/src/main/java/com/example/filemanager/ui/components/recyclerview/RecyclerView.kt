@@ -30,7 +30,7 @@ fun RecyclerView(viewModel: FileManagerViewModel, state: SnackbarHostState) {
     val items = viewModel.files
     val selectedItems by viewModel.selectedItems.collectAsState()
     val revealedItems by viewModel.revealedFiles.collectAsState()
-    val favoriteItems by viewModel.favoriteFiles.collectAsState()
+    val favoriteItems = viewModel.favoriteFiles
     val scope = rememberCoroutineScope()
 
     Box {

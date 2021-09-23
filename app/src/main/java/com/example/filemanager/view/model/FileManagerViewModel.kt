@@ -8,6 +8,8 @@ package com.example.filemanager.view.model
 import android.content.res.Resources
 import android.util.Log
 import androidx.annotation.StringRes
+import androidx.compose.material.DrawerValue
+import androidx.compose.material.rememberDrawerState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.datastore.core.DataStore
@@ -45,10 +47,10 @@ class FileManagerViewModel(dataStore: DataStore<Preferences>, private val resour
     private val _sortingOrder = mutableStateOf(SortingOrder.DEFAULT)
     private val _groupingType = mutableStateOf(GroupingType.DEFAULT)
     private val _theme = MutableStateFlow(false)
+    private val _favoriteFiles = mutableStateListOf<String>()
+    private val _lastFiles = mutableStateListOf<String>()
 
     private val _revealedFiles = MutableStateFlow(mutableStateListOf<String>())
-    private val _favoriteFiles = MutableStateFlow(mutableStateListOf<String>())
-    private val _lastFiles = MutableStateFlow(listOf<String>())
     private val _selectedItems = MutableStateFlow(mutableStateListOf<File>())
     private val _selectionMode = MutableStateFlow(false)
 
@@ -57,10 +59,10 @@ class FileManagerViewModel(dataStore: DataStore<Preferences>, private val resour
     val sortingOrder: State<SortingOrder> get() = _sortingOrder
     val groupingType: State<GroupingType> get() = _groupingType
     val theme: StateFlow<Boolean> get() = _theme
+    val favoriteFiles: SnapshotStateList<String> get() = _favoriteFiles
+    val lastFiles: SnapshotStateList<String> get() = _lastFiles
 
     val revealedFiles: StateFlow<SnapshotStateList<String>> get() = _revealedFiles
-    val favoriteFiles: StateFlow<List<String>> get() = _favoriteFiles
-    val lastFiles: StateFlow<List<String>> get() = _lastFiles
     val selectedItems: StateFlow<List<File>> get() = _selectedItems
     val selectionMode: StateFlow<Boolean> get() = _selectionMode
     val files: SnapshotStateList<FileItem>
@@ -103,21 +105,21 @@ class FileManagerViewModel(dataStore: DataStore<Preferences>, private val resour
         files.indexOf(files.find { it.file == file })
 
     fun onClickFavoriteFile(path: String) {
-        if (_favoriteFiles.value.contains(path)) removeFavoriteFile(path = path) else addFavoriteFile(
+        if (_favoriteFiles.contains(path)) removeFavoriteFile(path = path) else addFavoriteFile(
             path = path
         )
     }
 
     private fun addFavoriteFile(path: String) {
-        _favoriteFiles.value.add(path)
+        _favoriteFiles.add(path)
     }
 
     fun removeFavoriteFile(path: String) {
-        _favoriteFiles.value.remove(path)
+        _favoriteFiles.remove(path)
     }
 
     fun removeAllFavoriteFile() {
-        _favoriteFiles.value.clear()
+        _favoriteFiles.clear()
     }
 
     fun onItemExpanded(name: String) {
@@ -182,7 +184,11 @@ class FileManagerViewModel(dataStore: DataStore<Preferences>, private val resour
             true -> if (_selectedItems.value.contains(item.file)) removeSelectedItem(item.file) else addSelectedItem(
                 item.file
             )
-            else -> if (item.isDirectory) addPath(item.name)
+            else -> {
+                if (item.isDirectory) addPath(item.name)
+                _lastFiles.remove(item.path)
+                _lastFiles.add(0, item.path)
+            }
         }
     }
 
@@ -302,8 +308,8 @@ class FileManagerViewModel(dataStore: DataStore<Preferences>, private val resour
         viewModelScope.launch(Dispatchers.IO) {
             println("dwadwa3443")
             fileManagerDataStore.apply {
-                _favoriteFiles.value.addAll(getSet(key = FAVORITE_FILES_KEY))
-                _lastFiles.value = getSet(key = LAST_FILES_KEY)
+                _favoriteFiles.addAll(getSet(key = FAVORITE_FILES_KEY))
+                _lastFiles.addAll(getSet(key = LAST_FILES_KEY))
                 _theme.value = getBoolean(THEME)
                 _groupingType.value = GroupingType.valueOf(getString(GROUPING_TYPE))
                 _sortingType.value = SortingType.valueOf(getString(SORTING_TYPE))
@@ -316,8 +322,8 @@ class FileManagerViewModel(dataStore: DataStore<Preferences>, private val resour
     private fun onStop() {
         viewModelScope.launch(Dispatchers.IO) {
             fileManagerDataStore.apply {
-                save(key = FAVORITE_FILES_KEY, value = _favoriteFiles.value)
-                save(key = LAST_FILES_KEY, value = _lastFiles.value)
+                save(key = FAVORITE_FILES_KEY, value = _favoriteFiles)
+                save(key = LAST_FILES_KEY, value = _lastFiles)
                 save(key = THEME, value = _theme.value)
                 save(key = GROUPING_TYPE, value = _groupingType.value.name)
                 save(key = SORTING_TYPE, value = _sortingType.value.name)
