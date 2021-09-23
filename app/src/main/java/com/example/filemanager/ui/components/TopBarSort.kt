@@ -63,7 +63,7 @@ class TopBarSort(private val viewModel: FileManagerViewModel, private val widthW
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     fun OnClick(number: Int) {
-                        viewModel.setSortingType(SortingType.values()[number].id)
+                        viewModel.setSortingType(SortingType.values()[number].idRes)
                         viewModel.swapSortingOrder()
                     }
 

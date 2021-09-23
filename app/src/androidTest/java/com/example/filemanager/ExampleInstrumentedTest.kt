@@ -1,7 +1,9 @@
 package com.example.filemanager
 
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.filemanager.constants.LOG_TAG
 import com.example.filemanager.constants.STORAGE
 import com.example.filemanager.constants.pathDeleteFiles
 
@@ -28,8 +30,12 @@ class ExampleInstrumentedTest {
 
     @Test
     fun test() {
-        val file = File("$pathDeleteFiles/NewTextFile.txt")
-        file.copyTo(target = File("$STORAGE/NewTextFile.txt"), overwrite = true)
-        println(file.deleteRecursively())
+        val file = File("$STORAGE/did")
+        Log.d(LOG_TAG, file.parent!!)
+        Log.d(LOG_TAG, file.canonicalPath)
+        Log.d(LOG_TAG, file.extension)
+        Log.d(LOG_TAG, file.nameWithoutExtension)
+        Log.d(LOG_TAG, file.invariantSeparatorsPath)
+        Log.d(LOG_TAG, file.isAbsolute.toString())
     }
 }

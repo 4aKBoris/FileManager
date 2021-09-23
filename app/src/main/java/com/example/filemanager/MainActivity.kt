@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModelProvider
@@ -94,21 +95,21 @@ class MainActivity : ComponentActivity() {
 
         val scope = rememberCoroutineScope()
 
-        val openDrawer = {
+        val openDrawer = fun() {
             scope.launch {
                 scaffoldState.drawerState.open()
             }
         }
 
-        val closeDrawer = {
+        val closeDrawer = fun() {
             scope.launch {
                 scaffoldState.drawerState.close()
             }
         }
 
         Scaffold(
-            topBar = { TopBar(viewModel = viewModel, openDrawer = { openDrawer() }) },
-            drawerContent = { Drawer(viewModel = viewModel, closeDrawer = { closeDrawer() }) },
+            topBar = { TopBar(viewModel = viewModel, openDrawer = openDrawer) },
+            drawerContent = { Drawer(viewModel = viewModel, closeDrawer = closeDrawer) },
             content = {
                 Column(Modifier.fillMaxSize()) {
                     Box {

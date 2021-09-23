@@ -36,11 +36,11 @@ fun FavoriteFiles(viewModel: FileManagerViewModel, closeDrawer: () -> Unit) {
     RecyclerViewTab(
         listItems = viewModel.pathToDataTab(
             list = list,
-            onDelete = viewModel::removeFavoriteFile
+            onDelete = viewModel::removeFavoriteFile,
+            closeDrawer = closeDrawer
         ),
         imageVector = Icons.Default.Delete,
         description = R.string.delete_all_items,
-        onItemClick = viewModel::onItemClick,
         closeDrawer = closeDrawer,
         onBottomButtonClick = viewModel::removeAllFavoriteFile
     )
@@ -54,11 +54,11 @@ fun LastFiles(viewModel: FileManagerViewModel, closeDrawer: () -> Unit) {
     RecyclerViewTab(
         listItems = viewModel.pathToDataTab(
             list = list,
-            onDelete = viewModel::removeFavoriteFile
+            onDelete = viewModel::removeFavoriteFile,
+            closeDrawer = closeDrawer
         ),
         imageVector = Icons.Default.Delete,
         description = R.string.delete_all_items,
-        onItemClick = viewModel::onItemClick,
         closeDrawer = closeDrawer,
         onBottomButtonClick = viewModel::removeAllFavoriteFile
     )

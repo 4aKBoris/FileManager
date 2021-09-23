@@ -46,7 +46,7 @@ fun FileTitle(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(20.dp, 5.dp)
         ) {
-            FileIcon(drawable = painterResource(id = item.expansion))
+            FileIcon(drawable = painterResource(id = item.expansion.idRes))
             Crossfade(
                 targetState = edit,
                 animationSpec = tween(durationMillis = 500, easing = LinearEasing)

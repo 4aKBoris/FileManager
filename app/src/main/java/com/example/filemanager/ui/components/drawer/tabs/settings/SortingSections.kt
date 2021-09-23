@@ -23,30 +23,30 @@ import com.example.filemanager.view.model.FileManagerViewModel
 enum class SortingSections(@StringRes val id: Int) {
     Grouping(R.string.grouping) {
 
-        override fun Items() = GroupingType.values().map { it.id }
+        override fun Items() = GroupingType.values().map { it.idRes }
 
         override fun onClick(viewModel: FileManagerViewModel) = viewModel::setGroupingType
 
         @StringRes
-        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.groupingType.value.id
+        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.groupingType.value.idRes
     },
 
     SortType(R.string.sorting_type) {
-        override fun Items() = com.example.filemanager.sort.SortingType.values().map { it.id }
+        override fun Items() = com.example.filemanager.sort.SortingType.values().map { it.idRes }
 
         override fun onClick(viewModel: FileManagerViewModel) = viewModel::setSortingType
 
         @StringRes
-        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.sortingType.value.id
+        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.sortingType.value.idRes
     },
 
     SortOrder(R.string.sorting_order) {
-        override fun Items() = SortingOrder.values().map { it.id }
+        override fun Items() = SortingOrder.values().map { it.idRes }
 
         override fun onClick(viewModel: FileManagerViewModel) = viewModel::setSortingOrder
 
         @StringRes
-        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.sortingOrder.value.id
+        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.sortingOrder.value.idRes
     };
 
     abstract fun Items(): List<Int>

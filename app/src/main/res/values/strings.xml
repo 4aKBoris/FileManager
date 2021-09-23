@@ -40,5 +40,12 @@
     <string name="folders_on_top">Folders on top</string>
     <string name="files_on_top">Files on top</string>
 
+    <!-- Единицы измерения -->
+    <string name="one_byte">B</string>
+    <string name="kilobyte">KB</string>
+    <string name="megabyte">MB</string>
+    <string name="gigabyte">GB</string>
+    <string name="objects">objects</string>
+
 
 </resources>

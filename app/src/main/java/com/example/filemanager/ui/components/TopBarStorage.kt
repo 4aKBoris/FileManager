@@ -14,6 +14,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -92,8 +94,8 @@ class TopBarStorage(private val viewModel: FileManagerViewModel) {
                 ) {
                     val path by remember { viewModel.path }
                     val p = path.removePrefix(STORAGE).split('/').filterNot { it.isBlank() }
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_storage),
+                    Icon(
+                        imageVector = Icons.Default.Storage,
                         contentDescription = "",
                         modifier = Modifier
                             .size(40.dp)
@@ -138,8 +140,8 @@ class TopBarStorage(private val viewModel: FileManagerViewModel) {
 
     @Composable
     private fun Next() {
-        Image(
-            painter = painterResource(id = R.drawable.ic_next),
+        Icon(
+            imageVector = Icons.Default.NavigateNext,
             contentDescription = "",
             modifier = Modifier.size(30.dp)
         )

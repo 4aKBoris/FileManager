@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.example.filemanager.BuildConfig
 import com.example.filemanager.R
 import com.example.filemanager.view.model.FileManagerViewModel

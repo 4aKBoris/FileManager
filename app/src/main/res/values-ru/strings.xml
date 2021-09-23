@@ -40,5 +40,12 @@
     <string name="folders_on_top">Папки сверху</string>
     <string name="files_on_top">Файлы сверху</string>
 
+    <!-- Единицы измерения -->
+    <string name="one_byte">Б</string>
+    <string name="kilobyte">КБ</string>
+    <string name="megabyte">МБ</string>
+    <string name="gigabyte">ГБ</string>
+    <string name="objects">объектов</string>
+
 
 </resources>
