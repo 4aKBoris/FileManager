@@ -24,6 +24,8 @@
     <string name="sorting_type">Sorting type</string>
     <string name="sorting_order">Sorting order</string>
     <string name="default_string">Default</string>
+    <string name="advanced_settings">Advanced settings</string>
+    <string name="show_hidden_files_and_folders">Show hidden files and folders</string>
 
     <!-- Тип сортировки -->
     <string name="sorting_type_alphabetically">Alphabetically</string>

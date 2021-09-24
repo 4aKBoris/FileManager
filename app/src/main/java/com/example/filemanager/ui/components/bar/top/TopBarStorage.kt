@@ -10,7 +10,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.shrinkOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -23,7 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NavigateNext
@@ -72,7 +71,7 @@ fun TopBarStorage(viewModel: FileManagerViewModel) {
 @Composable
 private fun PathToFiles(viewModel: FileManagerViewModel) {
 
-    val path by remember { viewModel.path }
+    val path = viewModel.path
 
     val newPath = path.removePrefix(STORAGE).split('/').filter { it.isNotBlank() }
 
@@ -89,7 +88,6 @@ private fun PathToFiles(viewModel: FileManagerViewModel) {
                 brush = Brush.verticalGradient(listOf(Color.White, Color.Black)),
                 shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp)
             )
-            .background(Color.Yellow)
     ) {
         LazyRow(
             state = state,
@@ -97,25 +95,29 @@ private fun PathToFiles(viewModel: FileManagerViewModel) {
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
             item {
-                IconButton(onClick = { viewModel.newPath(STORAGE) }) {
-                    MenuIcon(imageVector = Icons.Default.SdCard)
-                }
+                MenuIcon(
+                    imageVector = Icons.Default.SdCard,
+                    modifier = Modifier.clickable { viewModel.newPath(STORAGE) })
             }
             newPath.fold(STORAGE) { total, next ->
+
+                val p = "$total/$next"
+
                 item {
                     MenuIcon(imageVector = Icons.Default.NavigateNext)
                 }
-                val p = "$total/$next"
+
                 item {
-                    Text(
-                        text = next,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.clickable { viewModel.newPath(p) })
+                    PathText(path = next, modifier = Modifier.clickable { viewModel.newPath(p) })
                 }
+
                 scope.launch {
-                    state.animateScrollToItem(newPath.size * 2, 0)
-                    state.animateScrollBy(1f, animationSpec = spring(stiffness = Spring.StiffnessVeryLow))
+                    state.animateScrollBy(
+                        500f,
+                        animationSpec = spring(stiffness = Spring.StiffnessVeryLow)
+                    )
                 }
+
                 p
             }
         }
@@ -124,12 +126,23 @@ private fun PathToFiles(viewModel: FileManagerViewModel) {
 }
 
 @Composable
-private fun MenuIcon(imageVector: ImageVector) {
+private fun PathText(path: String, modifier: Modifier) {
+    Text(
+        text = path,
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.subtitle1,
+        color = MaterialTheme.colors.primaryVariant,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun MenuIcon(imageVector: ImageVector, modifier: Modifier = Modifier) {
     Icon(
         imageVector = imageVector,
         contentDescription = "",
         tint = Color.DarkGray,
-        modifier = Modifier.size(36.dp)
+        modifier = modifier.size(36.dp)
     )
 }
 

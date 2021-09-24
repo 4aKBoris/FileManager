@@ -35,8 +35,8 @@ fun RecyclerView(
 ) {
 
     val items = viewModel.files
-    val selectedItems by viewModel.selectedItems.collectAsState()
-    val revealedItems by viewModel.revealedFiles.collectAsState()
+    val selectedItems = viewModel.selectedItems
+    val revealedItems = viewModel.revealedFiles
     val favoriteItems = viewModel.favoriteFiles
     val scope = rememberCoroutineScope()
     val stateLazyColumn = rememberLazyListState()

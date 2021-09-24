@@ -28,7 +28,7 @@ enum class SortingSections(@StringRes val id: Int) {
         override fun onClick(viewModel: FileManagerViewModel) = viewModel::setGroupingType
 
         @StringRes
-        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.groupingType.value.idRes
+        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.groupingType.idRes
     },
 
     SortType(R.string.sorting_type) {
@@ -37,7 +37,7 @@ enum class SortingSections(@StringRes val id: Int) {
         override fun onClick(viewModel: FileManagerViewModel) = viewModel::setSortingType
 
         @StringRes
-        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.sortingType.value.idRes
+        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.sortingType.idRes
     },
 
     SortOrder(R.string.sorting_order) {
@@ -46,7 +46,7 @@ enum class SortingSections(@StringRes val id: Int) {
         override fun onClick(viewModel: FileManagerViewModel) = viewModel::setSortingOrder
 
         @StringRes
-        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.sortingOrder.value.idRes
+        override fun getIdRes(viewModel: FileManagerViewModel) = viewModel.sortingOrder.idRes
     };
 
     abstract fun Items(): List<Int>

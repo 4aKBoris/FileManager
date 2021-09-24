@@ -75,9 +75,9 @@ private fun BottomBarMenu(
 
     val scaleFloat = FloatArray(5)
 
-    val selectMode by viewModel.selectionMode.collectAsState()
+    val selectMode = viewModel.selectionMode
 
-    val enabled = viewModel.selectedItems.value.isNotEmpty()
+    val enabled = viewModel.selectedItems.isNotEmpty()
 
     for (i in 0 until 5) {
         val time = 5000 * i

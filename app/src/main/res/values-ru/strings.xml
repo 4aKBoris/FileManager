@@ -24,6 +24,8 @@
     <string name="sorting_type">Тип сортировки</string>
     <string name="sorting_order">Порядок сортировки</string>
     <string name="default_string">По умолчанию</string>
+    <string name="advanced_settings">Расширенные настройки</string>
+    <string name="show_hidden_files_and_folders">Показывать скрытые файлы и папки</string>
 
     <!-- Тип сортировки -->
     <string name="sorting_type_alphabetically">По алфавиту</string>

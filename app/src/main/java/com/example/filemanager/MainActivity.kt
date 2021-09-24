@@ -11,10 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.preferencesDataStore
@@ -51,10 +48,7 @@ class MainActivity : ComponentActivity() {
         requestMultiplePermissions(this, 0)
 
         setContent {
-
-            val theme by viewModel.theme.collectAsState(false)
-
-            FileManagerTheme(theme) {
+            FileManagerTheme(viewModel.theme) {
                 Surface(
                     color = MaterialTheme.colors.background,
                     modifier = Modifier.wrapContentSize()

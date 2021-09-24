@@ -16,10 +16,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import com.example.filemanager.BuildConfig
 import com.example.filemanager.R
+import com.example.filemanager.ui.components.textfields.*
+import com.example.filemanager.ui.theme.DarkBlack
 import com.example.filemanager.view.model.FileManagerViewModel
 
 @Composable
@@ -31,18 +33,15 @@ fun Settings(viewModel: FileManagerViewModel) {
 
     var type by remember { mutableStateOf(SortingSections.Grouping) }
 
-    val theme by viewModel.theme.collectAsState(false)
-
     Box(modifier = Modifier.fillMaxSize()) {
 
         LazyColumn(state = state, contentPadding = PaddingValues(bottom = 24.dp)) {
             item {
                 Group(title = R.string.decoration) {
                     Item(text = R.string.theme) {
-                        Theme(theme = theme, onChangeTheme = viewModel::swapTheme)
+                        Theme(theme = viewModel.theme, onChangeTheme = viewModel::swapTheme)
                     }
                 }
-                Divider()
             }
             item {
                 Group(title = R.string.sorting) {
@@ -53,10 +52,22 @@ fun Settings(viewModel: FileManagerViewModel) {
                         }
                     }
                 }
-                Divider()
             }
             item {
-                Group(title = R.string.about_application) {
+                Group(title = R.string.advanced_settings) {
+                    Item(
+                        text = R.string.show_hidden_files_and_folders,
+                        modifier = Modifier.fillMaxWidth(fraction = 0.8f)
+                    ) {
+                        ShowHidden(
+                            hidden = viewModel.hidden,
+                            onChange = viewModel::onChangeHidden
+                        )
+                    }
+                }
+            }
+            item {
+                Group(title = R.string.about_application, divider = false) {
                     AboutApplication()
                 }
             }
@@ -79,34 +90,37 @@ private fun AboutApplication() {
 }
 
 @Composable
-private fun Group(@StringRes title: Int, body: @Composable () -> Unit) {
+private fun Group(@StringRes title: Int, divider: Boolean = true, body: @Composable () -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 24.dp, end = 24.dp, top = 16.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp), contentAlignment = Alignment.CenterStart
-        ) { TitleText(title = title) }
-        body()
+        Column(
+            modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp), contentAlignment = Alignment.CenterStart
+            ) { TitleText(text = stringResource(id = title)) }
+            body()
+        }
+        if (divider) {
+            Spacer(modifier = Modifier.height(height = 8.dp))
+            Divider()
+        }
     }
 }
 
 @Composable
-private fun TitleText(@StringRes title: Int) {
-    Text(
-        text = stringResource(id = title),
-        style = MaterialTheme.typography.h6,
-        color = MaterialTheme.colors.secondaryVariant,
-    )
-}
-
-@Composable
-private fun Item(@StringRes text: Int, body: @Composable () -> Unit) {
+private fun Item(
+    @StringRes text: Int,
+    modifier: Modifier = Modifier,
+    body: @Composable () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,7 +128,7 @@ private fun Item(@StringRes text: Int, body: @Composable () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = stringResource(id = text))
+        Text(text = stringResource(id = text), modifier = modifier)
         body()
     }
 }
@@ -124,13 +138,13 @@ private fun Item(@StringRes title: Int, @StringRes text: Int, onClick: () -> Uni
     IconButton(
         onClick = onClick, modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp)
+            .padding(vertical = 8.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            MainText(text = title)
-            SecondaryText(text = text)
+            MainText(text = stringResource(id = title))
+            SecondaryText(text = stringResource(id = text))
         }
     }
 }
@@ -150,21 +164,41 @@ private fun AlertDialogBuilder(
         text = { body() },
         title = {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                TitleText(title = title)
+                TitleText(text = stringResource(id = title))
             }
         },
         confirmButton = {
-            Box(modifier = Modifier
-                .clickable { onClose() }
-                .padding(end = 16.dp, bottom = 16.dp)) {
+            Box(
+                modifier = Modifier
+                    .clickable(onClick = onClose)
+                    .padding(end = 16.dp, bottom = 16.dp)
+            ) {
                 CancelText(text = stringResource(id = R.string.cancel))
             }
         })
 }
 
 @Composable
-private fun CancelText(text: String) {
-    Text(text = text, style = MaterialTheme.typography.h6, color = MaterialTheme.colors.primaryVariant)
+private fun ShowHidden(hidden: Boolean, onChange: (Boolean) -> Unit) {
+    Checkbox(
+        checked = hidden,
+        onCheckedChange = onChange,
+        modifier = Modifier.padding(start = 8.dp, end = 16.dp),
+        colors = CheckboxDefaults.colors(
+            checkedColor = MaterialTheme.colors.secondaryVariant,
+            uncheckedColor = MaterialTheme.colors.primaryVariant,
+            checkmarkColor = DarkBlack
+        )
+    )
+}
+
+@Preview
+@Composable
+private fun TestShowHidden() {
+
+    val (hidden, setHidden) = remember { mutableStateOf(false) }
+
+    ShowHidden(hidden = hidden, onChange = setHidden)
 }
 
 @Composable
@@ -191,31 +225,4 @@ private fun Theme(theme: Boolean, onChangeTheme: (Boolean) -> Unit) {
             }
         }
     }
-}
-
-@Composable
-private fun MainText(@StringRes text: Int) {
-    Text(
-        text = stringResource(id = text),
-        style = MaterialTheme.typography.subtitle2,
-        color = MaterialTheme.colors.primaryVariant,
-    )
-}
-
-@Composable
-private fun MinorText(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.subtitle2,
-        color = MaterialTheme.colors.primary,
-    )
-}
-
-@Composable
-private fun SecondaryText(@StringRes text: Int) {
-    Text(
-        text = stringResource(id = text),
-        style = MaterialTheme.typography.body2,
-        color = MaterialTheme.colors.primary,
-    )
 }

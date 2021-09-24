@@ -36,6 +36,6 @@ class ExampleInstrumentedTest {
         Log.d(LOG_TAG, file.extension)
         Log.d(LOG_TAG, file.nameWithoutExtension)
         Log.d(LOG_TAG, file.invariantSeparatorsPath)
-        Log.d(LOG_TAG, file.isAbsolute.toString())
+        Log.d(LOG_TAG, file.isHidden.toString())
     }
 }
