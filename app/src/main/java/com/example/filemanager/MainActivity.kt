@@ -2,61 +2,53 @@
 
 package com.example.filemanager
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.filemanager.components.*
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.ViewModelProvider
+import com.example.filemanager.ui.components.bar.bottom.BottomBar
+import com.example.filemanager.ui.components.bar.top.TopBar
+import com.example.filemanager.ui.components.bar.top.TopBarStorage
+import com.example.filemanager.ui.components.drawer.Drawer
+import com.example.filemanager.ui.components.recyclerview.RecyclerView
 import com.example.filemanager.ui.theme.FileManagerTheme
+import com.example.filemanager.view.model.FileManagerViewModel
+import com.example.filemanager.view.model.FileManagerViewModelFactory
+import kotlinx.coroutines.launch
+
+private const val DATA_STORE_FILE_MANAGER = "data_store_file_manager"
+
+private val Context.dataStoreFileManager by preferencesDataStore(name = DATA_STORE_FILE_MANAGER)
 
 class MainActivity : ComponentActivity() {
 
-    private val recyclerViewModel: RecyclerViewModel by viewModels()
+    private lateinit var viewModel: FileManagerViewModel
 
-    private lateinit var recyclerView: RecyclerView
-
-    private lateinit var topBar: TopBar
-
-    private lateinit var bottomBar: BottomBar
-
-    private lateinit var topBarStorage: TopBarStorage
-
-    private lateinit var topBarSort: TopBarSort
-
+    @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val p = Permissions()
-        p.requestMultiplePermissions(this, 0)
+        viewModel = ViewModelProvider(
+            this,
+            FileManagerViewModelFactory(dataStore = dataStoreFileManager, resources = resources)
+        ).get(FileManagerViewModel::class.java)
 
-        recyclerView = RecyclerView(recyclerViewModel)
+        lifecycle.addObserver(viewModel)
 
-        topBar = TopBar(recyclerViewModel)
-
-        bottomBar = BottomBar(recyclerViewModel)
-
-        topBarStorage = TopBarStorage(recyclerViewModel)
-
-        topBarSort =
-            TopBarSort(recyclerViewModel, resources.displayMetrics.widthPixels.toFloat() / 2)
+        requestMultiplePermissions(this, 0)
 
         setContent {
-            FileManagerTheme {
+            FileManagerTheme(viewModel.theme) {
                 Surface(
                     color = MaterialTheme.colors.background,
                     modifier = Modifier.wrapContentSize()
@@ -69,36 +61,57 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @OptIn(ExperimentalAnimationApi::class)
+    override fun onBackPressed() {
+        if (viewModel.isEmptyBackStack()) super.onBackPressed()
+        else viewModel.onBackPressed()
+    }
+
+    @OptIn(ExperimentalAnimationApi::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     @Composable
     fun MainContent() {
 
-        Scaffold(
-            topBar = { topBar.TopBar() },
-            content = {
-                Column(Modifier.fillMaxSize()) {
-                    Box() {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .align(Alignment.CenterStart)
-                        ) {
-                            topBarStorage.TopBarStorage()
-                            recyclerView.RecyclerView()
-                        }
-                        topBarSort.TopBarSort(modifier = Modifier.align(Alignment.BottomCenter))
-                    }
+        val scaffoldState =
+            rememberScaffoldState(rememberDrawerState(DrawerValue.Closed), SnackbarHostState())
 
+        val scope = rememberCoroutineScope()
+
+        val openDrawer = fun() {
+            scope.launch {
+                scaffoldState.drawerState.open()
+            }
+        }
+
+        val closeDrawer = fun() {
+            scope.launch {
+                scaffoldState.drawerState.close()
+            }
+        }
+
+        Scaffold(
+            topBar = { TopBar(viewModel = viewModel, openDrawer = openDrawer) },
+            drawerContent = { Drawer(viewModel = viewModel, closeDrawer = closeDrawer) },
+            content = {
+
+                Scaffold(modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    TopBarStorage(viewModel = viewModel)
+                }) { innerPadding ->
+                    RecyclerView(
+                        viewModel = viewModel,
+                        state = scaffoldState.snackbarHostState,
+                                innerPadding = innerPadding
+                    )
                 }
             },
-            floatingActionButton = {
-                IconToggleButton(checked = false, onCheckedChange = {}, modifier = Modifier.border(width = 2.dp, color = Color.Black)) {
-                    Icon(imageVector = Icons.Default.Check, contentDescription = "Режим выделения")
-                }
+            scaffoldState = scaffoldState,
+            bottomBar = {
+                BottomBar(
+                    viewModel = viewModel,
+                    displayWidth =
+                    (resources.displayMetrics.widthPixels / resources.displayMetrics.density).dp,
+                    state = scaffoldState.snackbarHostState
+                )
             },
-            floatingActionButtonPosition = FabPosition.End,
-            isFloatingActionButtonDocked = true,
-            bottomBar = { bottomBar.BottomBar() }
         )
     }
 }

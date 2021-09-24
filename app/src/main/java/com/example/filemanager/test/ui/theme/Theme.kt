@@ -27,7 +27,7 @@ private val LightColorPalette = lightColors(
     */
 )
 
-@Composable
+/*@Composable
 fun FileManagerTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) {
         DarkColorPalette
@@ -41,4 +41,4 @@ fun FileManagerTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Compo
         shapes = Shapes,
         content = content
     )
-}
+}*/

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_activity_test">Тест</string>
+
+    <!-- Боковое меню -->
+    <string name="delete_item">Удалить</string>
+    <string name="delete_all_items">Удалить все элементы</string>
+    <string name="folder">Папка</string>
+    <string name="file">Файл</string>
+    <string name="disks">Диски</string>
+    <string name="favorite_files">Избранные</string>
+    <string name="last_files">Последние</string>
+    <string name="settings">Настройки</string>
+    <string name="change_theme">Смена темы</string>
+    <string name="theme">Тема</string>
+    <string name="light">Светлая</string>
+    <string name="dark">Тёмная</string>
+    <string name="decoration">Оформление</string>
+    <string name="sorting">Сортировка</string>
+    <string name="about_application">О приложении</string>
+    <string name="version">Версия</string>
+    <string name="cancel">Отмена</string>
+    <string name="grouping">Групировка</string>
+    <string name="sorting_type">Тип сортировки</string>
+    <string name="sorting_order">Порядок сортировки</string>
+    <string name="default_string">По умолчанию</string>
+    <string name="advanced_settings">Расширенные настройки</string>
+    <string name="show_hidden_files_and_folders">Показывать скрытые файлы и папки</string>
+
+    <!-- Тип сортировки -->
+    <string name="sorting_type_alphabetically">По алфавиту</string>
+    <string name="sorting_type_by_size">По размеру</string>
+    <string name="sorting_type_by_creation_date">По дате создания</string>
+    <string name="sorting_type_by_date_of_change">По дате изменения</string>
+    <string name="sorting_type_by_opening_date">По дате открытия</string>
+
+    <!-- Порядок сортировки -->
+    <string name="ascending_order">По возрастанию</string>
+    <string name="descending_order">По убыванию</string>
+
+    <!-- Тип группировки -->
+    <string name="folders_on_top">Папки сверху</string>
+    <string name="files_on_top">Файлы сверху</string>
+
+    <!-- Единицы измерения -->
+    <string name="one_byte">Б</string>
+    <string name="kilobyte">КБ</string>
+    <string name="megabyte">МБ</string>
+    <string name="gigabyte">ГБ</string>
+    <string name="objects">объектов</string>
+
+    <!-- Верхнее меню -->
+    <string name="file_path">Путь к файлам</string>
+    <string name="menu">Меню</string>
+    <string name="search">Поиск</string>
+    <string name="stop_searching">Прекратить поиск</string>
+
+
+</resources>

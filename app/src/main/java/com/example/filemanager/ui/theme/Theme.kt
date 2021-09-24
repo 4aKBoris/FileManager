@@ -7,15 +7,23 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 
 private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    primary = LightGray,
+    primaryVariant = DarkWhite,
+    secondary = LightGray,
+    surface = SurfaceDark,
+    background = DarkBlack,
+    onBackground = DarkWhite,
+    secondaryVariant = SettingsColor
 )
 
 private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    primary = LightGray,
+    primaryVariant = Black,
+    secondary = LightGray,
+    surface = SurfaceLight,
+    background = White,
+    onBackground = Black,
+    secondaryVariant = SettingsColor
 
     /* Other default colors to override
     background = Color.White,
@@ -29,11 +37,7 @@ private val LightColorPalette = lightColors(
 
 @Composable
 fun FileManagerTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
+    val colors = if (darkTheme) DarkColorPalette else LightColorPalette
 
     MaterialTheme(
         colors = colors,
