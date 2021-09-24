@@ -3,11 +3,8 @@
 package com.example.filemanager.components
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -117,27 +114,7 @@ class RecyclerView(private val viewModel: RecyclerViewModel) {
                         ),
                         finishedListener = null
                     )
-                ) {
-                    AnimatedVisibility(
-                        visible = storage.value,
-                        enter = slideInVertically(
-                            initialOffsetY = { fullHeight -> -fullHeight },
-                            animationSpec = tween(
-                                durationMillis = 1000,
-                                easing = LinearOutSlowInEasing
-                            )
-                        ),
-                        exit = slideOutVertically(
-                            targetOffsetY = { fullHeight -> -fullHeight },
-                            animationSpec = tween(
-                                durationMillis = 1000,
-                                easing = LinearOutSlowInEasing
-                            )
-                        )
-                    ) { Path() }
-
-                    if (dialog.value!!) Select()
-                }
+                ) { if (dialog.value!!) Select() }
             }
 
             if (!emptyFolder.value) items(items) {
@@ -199,97 +176,6 @@ class RecyclerView(private val viewModel: RecyclerViewModel) {
         }
     }
 
-    @Composable
-    private fun Path() {
-
-        val path by viewModel.path.observeAsState(STORAGE)
-
-        val storage = viewModel.storage.observeAsState()
-
-        val dp: Dp by animateDpAsState(
-            targetValue = if (storage.value!!) 0.dp else (-10).dp,
-            animationSpec = spring(Spring.DampingRatioNoBouncy, Spring.StiffnessLow)
-        )
-
-        val angle: Float by animateFloatAsState(
-            targetValue = if (storage.value!!) 180F else 0F,
-            animationSpec = tween(
-                durationMillis = 1000,
-                easing = FastOutSlowInEasing
-            ),
-            finishedListener = {}
-        )
-
-        Column(
-            modifier = Modifier
-                .background(Color.White)
-                .fillMaxWidth()
-        ) {
-            Box(
-                Modifier
-                    .height(50.dp)
-                    .padding(start = 20.dp)
-                    .fillMaxWidth()) {
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .horizontalScroll(ScrollState(0)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val p = path.removePrefix(STORAGE).split('/').filterNot { it.isBlank() }
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_storage),
-                        contentDescription = "",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clickable { viewModel.path.value = STORAGE }
-                    )
-                    if (p.isNotEmpty()) p.forEachIndexed { index, s ->
-                        Next()
-                        PointPath(
-                            s,
-                            p.take(index + 1).fold(STORAGE) { total, next -> "$total/$next" })
-                    }
-                }
-                IconButton(onClick = { viewModel.storage.value = viewModel.storage.value!!.not() },
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .absoluteOffset(y = dp)
-                    .rotate(angle)) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDownward,
-                        contentDescription = "Путь к файлам",
-                    )
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .height(1.dp)
-                    .background(Color.Black)
-                    .fillMaxWidth()
-            )
-        }
-    }
-
-    @Composable
-    private fun PointPath(name: String, path: String) {
-        Text(
-            text = name,
-            fontSize = 20.sp,
-            fontStyle = FontStyle.Italic,
-            color = colorResource(id = R.color.gray_point_path),
-            modifier = Modifier.clickable { viewModel.path.value = path })
-    }
-
-    @Composable
-    private fun Next() {
-        Image(
-            painter = painterResource(id = R.drawable.ic_next),
-            contentDescription = "",
-            modifier = Modifier.size(30.dp)
-        )
-    }
-
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     private fun Item(
@@ -298,10 +184,14 @@ class RecyclerView(private val viewModel: RecyclerViewModel) {
         onClick: () -> Unit,
         onLongClick: () -> Unit
     ) {
+
+        val backgroundColor by animateColorAsState(targetValue = if (select) Color.LightGray else Color.White,
+        animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing))
+
         Box(
             modifier = Modifier
                 .combinedClickable(onClick = { onClick() }, onLongClick = { onLongClick() })
-                .background(if (select) Color.Cyan else Color.White)
+                .background(backgroundColor)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

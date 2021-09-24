@@ -2,20 +2,26 @@
 
 package com.example.filemanager
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.filemanager.components.BottomBar
-import com.example.filemanager.components.RecyclerView
-import com.example.filemanager.components.TopBar
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.example.filemanager.components.*
 import com.example.filemanager.ui.theme.FileManagerTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,6 +33,10 @@ class MainActivity : ComponentActivity() {
     private lateinit var topBar: TopBar
 
     private lateinit var bottomBar: BottomBar
+
+    private lateinit var topBarStorage: TopBarStorage
+
+    private lateinit var topBarSort: TopBarSort
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,9 +50,13 @@ class MainActivity : ComponentActivity() {
 
         bottomBar = BottomBar(recyclerViewModel)
 
+        topBarStorage = TopBarStorage(recyclerViewModel)
+
+        topBarSort =
+            TopBarSort(recyclerViewModel, resources.displayMetrics.widthPixels.toFloat() / 2)
+
         setContent {
             FileManagerTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     color = MaterialTheme.colors.background,
                     modifier = Modifier.wrapContentSize()
@@ -55,7 +69,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @SuppressLint("CoroutineCreationDuringComposition")
     @OptIn(ExperimentalAnimationApi::class)
     @Composable
     fun MainContent() {
@@ -64,13 +77,28 @@ class MainActivity : ComponentActivity() {
             topBar = { topBar.TopBar() },
             content = {
                 Column(Modifier.fillMaxSize()) {
-                    Row() {
-                        recyclerView.RecyclerView()
+                    Box() {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .align(Alignment.CenterStart)
+                        ) {
+                            topBarStorage.TopBarStorage()
+                            recyclerView.RecyclerView()
+                        }
+                        topBarSort.TopBarSort(modifier = Modifier.align(Alignment.BottomCenter))
                     }
 
                 }
             },
-            bottomBar = { bottomBar.BottomBar()}
+            floatingActionButton = {
+                IconToggleButton(checked = false, onCheckedChange = {}, modifier = Modifier.border(width = 2.dp, color = Color.Black)) {
+                    Icon(imageVector = Icons.Default.Check, contentDescription = "Режим выделения")
+                }
+            },
+            floatingActionButtonPosition = FabPosition.End,
+            isFloatingActionButtonDocked = true,
+            bottomBar = { bottomBar.BottomBar() }
         )
     }
 }

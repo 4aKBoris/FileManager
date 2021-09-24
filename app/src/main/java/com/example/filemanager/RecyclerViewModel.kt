@@ -18,6 +18,7 @@ class RecyclerViewModel : ViewModel() {
     private val _storage = MutableLiveData(false)
     private val _action = MutableLiveData(0)
     private val _animationBottomBar = MutableLiveData(false)
+    private val _topBarSortMenuVisible = MutableLiveData(false)
 
     val path: MutableLiveData<String> = _path
     val select: MutableLiveData<Boolean> = _select
@@ -32,6 +33,8 @@ class RecyclerViewModel : ViewModel() {
     val storage: MutableLiveData<Boolean> = _storage
     val action: MutableLiveData<Int> = _action
     val animationBottomBar: MutableLiveData<Boolean> = _animationBottomBar
+    val topBarSortMenuVisible: MutableLiveData<Boolean> = _topBarSortMenuVisible
+
 
     fun SwapDialog() { _dialog.value = _dialog.value!!.not() }
 }
